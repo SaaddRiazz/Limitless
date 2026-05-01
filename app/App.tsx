@@ -4,7 +4,7 @@ import React, { ComponentProps } from "react";
 
 import ChatbotScreen from "./screens/chatbot-screen";
 import HomeScreen from "./screens/home-screen";
-import NutritionScreen from "./screens/nutrition-screen";
+import LoggerScreen from "./screens/logger-screen";
 import ProfileScreen from "./screens/profile-screen";
 import WorkoutScreen from "./screens/workout-screen";
 
@@ -30,8 +30,8 @@ export default function App() {
             iconName = "home-variant";
           } else if (route.name === "Workout") {
             iconName = "dumbbell";
-          } else if (route.name === "Nutrition") {
-            iconName = "food-apple";
+          } else if (route.name === "Logger") {
+            iconName = "clipboard-text";
           } else if (route.name === "Chat") {
             iconName = "robot";
           } else {
@@ -46,7 +46,7 @@ export default function App() {
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Workout" component={WorkoutScreen} />
-      <Tab.Screen name="Nutrition" component={NutritionScreen} />
+      <Tab.Screen name="Logger" component={LoggerScreen} />
       <Tab.Screen name="Chat" component={ChatbotScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>

@@ -36,8 +36,8 @@ export default function RootLayout() {
           options={{ title: "Workout", headerShown: false }}
         />
         <Stack.Screen
-          name="screens/nutrition-screen"
-          options={{ title: "Nutrition", headerShown: false }}
+          name="screens/logger-screen"
+          options={{ title: "Logger", headerShown: false }}
         />
         <Stack.Screen
           name="screens/chatbot-screen"
