@@ -51,16 +51,17 @@ export default function SignUp() {
         />
       </View>
 
-      <TouchableOpacity style={auth.loginButton}>
+      <TouchableOpacity
+        style={auth.loginButton}
+        onPress={() => router.push("/App")}
+      >
         <Text style={auth.loginText}>SIGN UP</Text>
       </TouchableOpacity>
 
       <View style={auth.registerContainer}>
         <Text style={auth.registerText}>Already have an account? </Text>
-        <TouchableOpacity>
-          <Text style={auth.linkText} onPress={() => router.back()}>
-            Sign in.
-          </Text>
+        <TouchableOpacity onPress={() => router.back()}>
+          <Text style={auth.linkText}>Sign in.</Text>
         </TouchableOpacity>
       </View>
     </View>

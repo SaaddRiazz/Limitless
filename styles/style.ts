@@ -72,3 +72,27 @@ export const auth = StyleSheet.create({
     fontWeight: "600",
   },
 });
+
+export const main = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#00000a",
+    paddingTop: 60,
+    paddingHorizontal: 20,
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: "900",
+    color: "#ffffff",
+    letterSpacing: 4,
+    textShadowColor: "rgba(255, 255, 255, 0.75)",
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 20,
+    marginBottom: 20,
+  },
+  grid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
+});

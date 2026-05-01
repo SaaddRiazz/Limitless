@@ -23,6 +23,30 @@ export default function RootLayout() {
           name="sign-up"
           options={{ title: "Sign Up", headerShown: false }}
         />
+        <Stack.Screen
+          name="App"
+          options={{ title: "Main", headerShown: false }}
+        />
+        <Stack.Screen
+          name="screens/home-screen"
+          options={{ title: "Home", headerShown: false }}
+        />
+        <Stack.Screen
+          name="screens/workout-screen"
+          options={{ title: "Workout", headerShown: false }}
+        />
+        <Stack.Screen
+          name="screens/nutrition-screen"
+          options={{ title: "Nutrition", headerShown: false }}
+        />
+        <Stack.Screen
+          name="screens/chatbot-screen"
+          options={{ title: "Chatbot", headerShown: false }}
+        />
+        <Stack.Screen
+          name="screens/profile-screen"
+          options={{ title: "Profile", headerShown: false }}
+        />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>
