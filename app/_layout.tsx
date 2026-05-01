@@ -16,12 +16,12 @@ export default function RootLayout() {
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen
-          name="signup"
-          options={{ title: "Sign Up", headerShown: false }}
+          name="sign-in"
+          options={{ title: "Log In", headerShown: false }}
         />
         <Stack.Screen
-          name="login"
-          options={{ title: "Log In", headerShown: false }}
+          name="sign-up"
+          options={{ title: "Sign Up", headerShown: false }}
         />
       </Stack>
       <StatusBar style="auto" />
