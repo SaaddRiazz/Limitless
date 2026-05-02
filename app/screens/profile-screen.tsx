@@ -1,4 +1,6 @@
 import { supabase } from "@/lib/supabase";
+import { decode } from "base64-arraybuffer";
+import * as FileSystem from "expo-file-system/legacy";
 import * as ImagePicker from "expo-image-picker";
 import React, { useEffect, useState } from "react";
 import {
@@ -19,7 +21,10 @@ export default function ProfileScreen() {
   const [username, setUsername] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [xp, setXp] = useState(0);
-  const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
+  const [message, setMessage] = useState<{
+    text: string;
+    type: "success" | "error";
+  } | null>(null);
 
   useEffect(() => {
     getProfile();
@@ -28,7 +33,9 @@ export default function ProfileScreen() {
   async function getProfile() {
     try {
       setLoading(true);
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       const user = session?.user;
 
       if (!user) throw new Error("No user on the session!");
@@ -65,7 +72,6 @@ export default function ProfileScreen() {
     avatar_url: string | null;
   }) {
     try {
-      console.log("starting");
       setLoading(true);
       setMessage(null);
 
@@ -73,9 +79,10 @@ export default function ProfileScreen() {
       if (trimmedUsername.length > 0 && trimmedUsername.length < 3) {
         throw new Error("Username must be at least 3 characters long.");
       }
-      console.log(trimmedUsername);
 
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       const user = session?.user;
       if (!user) throw new Error("Session expired. Please log in again.");
 
@@ -86,22 +93,22 @@ export default function ProfileScreen() {
         updated_at: new Date().toISOString(),
       };
 
-      // Use .select() to verify the database actually returned the updated row
+      // Ensure id: user.id is used for the upsert logic
       const { data, error } = await supabase
         .from("profiles")
-        .upsert(updates, { onConflict: 'id' })
+        .upsert(updates, { onConflict: "id" })
         .select();
 
       if (error) throw error;
 
       if (!data || data.length === 0) {
-        throw new Error("The update was accepted but no rows were changed. Check your RLS policies!");
+        throw new Error(
+          "The update was accepted but no rows were changed. Check your RLS policies!"
+        );
       }
 
-      console.log("Database response:", data);
       setMessage({ text: "Profile updated successfully!", type: "success" });
       setTimeout(() => setMessage(null), 3000);
-
     } catch (error) {
       console.error("Update Error:", error);
       if (error instanceof Error) {
@@ -113,12 +120,10 @@ export default function ProfileScreen() {
     }
   }
 
-
-
   async function pickImage() {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ["images"], // Modern API for Expo 54+
+        mediaTypes: ["images"],
         allowsEditing: true,
         aspect: [1, 1],
         quality: 1,
@@ -134,39 +139,49 @@ export default function ProfileScreen() {
 
   async function uploadAvatar(uri: string) {
     try {
+      console.log("papapatututut");
       setUploading(true);
       setMessage(null);
-
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       const user = session?.user;
       if (!user) throw new Error("No user session found. Please log in again.");
 
-      // Modern fetch(uri).blob() approach to avoid deprecation warnings
-      const response = await fetch(uri);
-      const blob = await response.blob();
+      // 1. Read file as base64 using legacy expo-file-system
+      const base64 = await FileSystem.readAsStringAsync(uri, {
+        encoding: "base64",
+      });
+
+      // 2. Convert base64 to ArrayBuffer (more stable for Supabase in React Native)
+      const arrayBuffer = decode(base64);
 
       const fileExt = uri.split(".").pop()?.toLowerCase() ?? "jpeg";
       const path = `${user.id}/${Date.now()}.${fileExt}`;
 
+      // 3. Upload ArrayBuffer to Supabase Storage
       const { data, error } = await supabase.storage
         .from("avatars")
-        .upload(path, blob, {
+        .upload(path, arrayBuffer, {
           contentType: `image/${fileExt}`,
-          upsert: true
+          upsert: true,
         });
 
       if (error) throw error;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from("avatars")
-        .getPublicUrl(data.path);
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("avatars").getPublicUrl(data.path);
 
       setAvatarUrl(publicUrl);
-      // Automatically save the avatar URL to the profile
+
+      // 4. Update the profile with the new URL
       await updateProfile({ username, avatar_url: publicUrl });
     } catch (error) {
+      console.error("Upload Error:", error);
       if (error instanceof Error) {
-        Alert.alert("Error uploading avatar", error.message);
+        setMessage({ text: error.message, type: "error" });
+        Alert.alert("Upload Failed", error.message);
       }
     } finally {
       setUploading(false);
@@ -228,7 +243,9 @@ export default function ProfileScreen() {
           {xp} XP
         </Text>
         <View style={main.progressBarBg}>
-          <View style={[main.progressBarFill, { width: `${(xp % 1000) / 10}%` }]} />
+          <View
+            style={[main.progressBarFill, { width: `${(xp % 1000) / 10}%` }]}
+          />
         </View>
       </View>
 
@@ -248,7 +265,7 @@ export default function ProfileScreen() {
 
       {/* Save Button */}
       <TouchableOpacity
-        style={[auth.loginButton, loading && { opacity: 0.5 }]}
+        style={[auth.loginButton, (loading || uploading) && { opacity: 0.5 }]}
         onPress={() => updateProfile({ username, avatar_url: avatarUrl })}
         disabled={loading || uploading}
       >
@@ -261,11 +278,13 @@ export default function ProfileScreen() {
       {/* Success/Error Message */}
       {message && (
         <View style={{ marginTop: 15, alignItems: "center" }}>
-          <Text style={{
-            color: message.type === "success" ? "#4CAF50" : "#F44336",
-            fontWeight: "bold",
-            fontSize: 14
-          }}>
+          <Text
+            style={{
+              color: message.type === "success" ? "#4CAF50" : "#F44336",
+              fontWeight: "bold",
+              fontSize: 14,
+            }}
+          >
             {message.text}
           </Text>
         </View>
