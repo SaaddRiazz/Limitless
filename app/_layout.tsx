@@ -7,7 +7,7 @@ import {
 } from "@react-navigation/native";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import "react-native-reanimated";
 
 import { View } from "react-native";
@@ -38,14 +38,18 @@ function RootLayoutNav() {
     if (!session && !inAuthGroup) {
       // Redirect to sign-in if not logged in
       router.replace("/sign-in");
-    } else if (session && inAuthGroup) {
-      // Redirect to main app if logged in and trying to access auth screens
+    } else if (session && (inAuthGroup || !segments[0])) {
+      // Redirect to main app if logged in and at root or auth screens
       router.replace("/App");
     }
   }, [session, isLoading, segments]);
 
   return (
     <Stack>
+      <Stack.Screen
+        name="index"
+        options={{ headerShown: false }}
+      />
       <Stack.Screen
         name="sign-in"
         options={{ title: "Log In", headerShown: false }}
@@ -73,6 +77,10 @@ function RootLayoutNav() {
       <Stack.Screen
         name="screens/chatbot-screen"
         options={{ title: "Chatbot", headerShown: false }}
+      />
+      <Stack.Screen
+        name="screens/chat-screen"
+        options={{ title: "AI Trainer", headerShown: false }}
       />
       <Stack.Screen
         name="screens/profile-screen"
