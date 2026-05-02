@@ -1,52 +1,117 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { supabase } from "@/lib/supabase";
 import { BackButton } from "../../../components/ui/back-button";
 import { HistoryCard } from "../../../components/ui/history-card";
 import { colors } from "../../../styles/colors";
 import { logger, main } from "../../../styles/style";
 
 export default function WaterLog() {
-  const [ml, setMl] = useState(2250);
-  const [savedMl, setSavedMl] = useState(2250);
+  const [ml, setMl] = useState(0);
+  const [savedMl, setSavedMl] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [history, setHistory] = useState<any[]>([]);
 
-  const [history] = useState([
-    {
-      id: 2,
-      date: "Yesterday",
-      total: "3250ml",
-      title: "Goal Reached",
-      color: colors.green,
-    },
-    {
-      id: 3,
-      date: "Oct 29",
-      total: "2000ml",
-      title: "Under Goal",
-      color: colors.orange,
-    },
-    {
-      id: 4,
-      date: "Oct 28",
-      total: "3500ml",
-      title: "Goal Reached",
-      color: colors.red,
-    },
-  ]);
+  useEffect(() => {
+    fetchInitialData();
+  }, []);
+
+  const fetchInitialData = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const user_id = session.user.id;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const { data: today_data, error: today_error } = await supabase
+        .from("water_logs")
+        .select("amount_ml")
+        .eq("user_id", user_id)
+        .gte("created_at", today.toISOString());
+
+      if (today_error) throw today_error;
+
+      const total_today = today_data?.reduce((sum, item) => sum + item.amount_ml, 0) || 0;
+      setMl(total_today);
+      setSavedMl(total_today);
+
+      const seven_days_ago = new Date();
+      seven_days_ago.setDate(seven_days_ago.getDate() - 7);
+      seven_days_ago.setHours(0, 0, 0, 0);
+
+      const { data: history_data, error: history_error } = await supabase
+        .from("water_logs")
+        .select("amount_ml, created_at")
+        .eq("user_id", user_id)
+        .gte("created_at", seven_days_ago.toISOString())
+        .lt("created_at", today.toISOString())
+        .order("created_at", { ascending: false });
+
+      if (history_error) throw history_error;
+
+      const grouped = (history_data || []).reduce((acc: any, item) => {
+        const date_key = new Date(item.created_at).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        });
+        if (!acc[date_key]) acc[date_key] = 0;
+        acc[date_key] += item.amount_ml;
+        return acc;
+      }, {});
+
+      const history_array = Object.keys(grouped).map((date, index) => ({
+        id: index,
+        date,
+        total: `${grouped[date]}ml`,
+        title: grouped[date] >= 3000 ? "Goal Reached" : "Under Goal",
+        color: grouped[date] >= 3000 ? colors.green : colors.orange,
+      }));
+
+      setHistory(history_array);
+    } catch (error) {
+      console.error("Error fetching water data:", error);
+    }
+  };
 
   const adjustWater = (amount: number) => {
     setMl((prev) => Math.max(0, prev + amount));
   };
 
-  const handleSave = () => {
-    setSavedMl(ml);
-    console.log("Saved intake:", ml);
+  const handleSave = async () => {
+    setLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const amount_to_add = ml - savedMl;
+      if (amount_to_add === 0) return;
+
+      const { error } = await supabase
+        .from("water_logs")
+        .insert({
+          user_id: session.user.id,
+          amount_ml: amount_to_add,
+        });
+
+      if (error) throw error;
+
+      setSavedMl(ml);
+      fetchInitialData();
+    } catch (error) {
+      console.error("Error saving water log:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const isAtZero = ml <= 0;
@@ -134,11 +199,15 @@ export default function WaterLog() {
             { backgroundColor: ml === savedMl ? colors.divider : colors.cyan },
           ]}
           onPress={handleSave}
-          disabled={ml === savedMl}
+          disabled={ml === savedMl || loading}
         >
-          <Text style={[logger.submitBtnText, { color: colors.black }]}>
-            {ml === savedMl ? "SAVED" : "SAVE SESSION"}
-          </Text>
+          {loading ? (
+            <ActivityIndicator color={colors.black} />
+          ) : (
+            <Text style={[logger.submitBtnText, { color: colors.black }]}>
+              {ml === savedMl ? "SAVED" : "SAVE SESSION"}
+            </Text>
+          )}
         </TouchableOpacity>
       </View>
     </View>

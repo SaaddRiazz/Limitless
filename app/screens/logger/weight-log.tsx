@@ -1,6 +1,7 @@
 import { BackButton } from "@/components/ui/back-button";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Dimensions,
   ScrollView,
   Text,
@@ -9,33 +10,66 @@ import {
   View,
 } from "react-native";
 import { LineChart } from "react-native-chart-kit";
+import { supabase } from "@/lib/supabase";
 import { colors } from "../../../styles/colors";
 import { logger, main } from "../../../styles/style";
 
 export default function WeightLog() {
-  const [weight, setWeight] = useState("75");
-  const [height, setHeight] = useState("180");
+  const [weight, setWeight] = useState("0");
+  const [height, setHeight] = useState("0");
+  const [loading, setLoading] = useState(false);
+  const [history, setHistory] = useState<any[]>([]);
 
   const weightInputRef = useRef<TextInput>(null);
   const heightInputRef = useRef<TextInput>(null);
 
-  const [history, setHistory] = useState([
-    { date: "04/01", val: 88.2 },
-    { date: "04/02", val: 88.0 },
-    { date: "04/03", val: 88.1 },
-    { date: "04/12", val: 86.6 },
-    { date: "04/13", val: 86.2 },
-    { date: "04/04", val: 87.8 },
-    { date: "04/05", val: 87.5 },
-    { date: "04/06", val: 87.6 },
-    { date: "04/07", val: 87.2 },
-    { date: "04/15", val: 86.0 },
-    { date: "04/08", val: 87.0 },
-    { date: "04/09", val: 87.1 },
-    { date: "04/10", val: 86.8 },
-    { date: "04/11", val: 86.5 },
-    { date: "04/14", val: 85.9 },
-  ]);
+  useEffect(() => {
+    fetchInitialData();
+  }, []);
+
+  const fetchInitialData = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const user_id = session.user.id;
+
+      const { data: latest_data, error: latest_error } = await supabase
+        .from("biometrics")
+        .select("weight_kg, height_cm")
+        .eq("user_id", user_id)
+        .order("created_at", { ascending: false })
+        .limit(1);
+
+      if (latest_error) throw latest_error;
+
+      if (latest_data && latest_data.length > 0) {
+        setWeight(latest_data[0].weight_kg.toString());
+        setHeight(latest_data[0].height_cm.toString());
+      }
+
+      const { data: history_data, error: history_error } = await supabase
+        .from("biometrics")
+        .select("weight_kg, created_at")
+        .eq("user_id", user_id)
+        .order("created_at", { ascending: true })
+        .limit(15);
+
+      if (history_error) throw history_error;
+
+      const formatted_history = (history_data || []).map((item) => ({
+        date: new Date(item.created_at).toLocaleDateString("en-US", {
+          month: "2-digit",
+          day: "2-digit",
+        }),
+        val: item.weight_kg,
+      }));
+
+      setHistory(formatted_history);
+    } catch (error) {
+      console.error("Error fetching weight data:", error);
+    }
+  };
 
   const bmiData = useMemo(() => {
     const w = parseFloat(weight);
@@ -61,22 +95,36 @@ export default function WeightLog() {
     return { score, label, color };
   }, [weight, height]);
 
-  const handleUpdate = () => {
-    const newEntry = {
-      date: new Date().toLocaleDateString("en-US", {
-        month: "2-digit",
-        day: "2-digit",
-      }),
-      val: parseFloat(weight),
-    };
-    setHistory([...history, newEntry]);
+  const handleUpdate = async () => {
+    setLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const { error } = await supabase
+        .from("biometrics")
+        .insert({
+          user_id: session.user.id,
+          weight_kg: parseFloat(weight),
+          height_cm: parseFloat(height),
+          bmi: parseFloat(bmiData.score),
+        });
+
+      if (error) throw error;
+
+      fetchInitialData();
+    } catch (error) {
+      console.error("Error updating biometrics:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const chartData = {
-    labels: history.slice(-5).map((h) => h.date),
+    labels: history.length > 0 ? history.slice(-5).map((h) => h.date) : ["-"],
     datasets: [
       {
-        data: history.slice(-15).map((h) => Number(h.val)),
+        data: history.length > 0 ? history.slice(-15).map((h) => Number(h.val)) : [0],
         color: () => colors.yellow,
         strokeWidth: 3,
       },
@@ -204,10 +252,15 @@ export default function WeightLog() {
             { backgroundColor: colors.yellow, marginBottom: 40 },
           ]}
           onPress={handleUpdate}
+          disabled={loading}
         >
-          <Text style={[logger.submitBtnText, { color: "#000" }]}>
-            SAVE BIOMETRICS
-          </Text>
+          {loading ? (
+            <ActivityIndicator color={colors.black} />
+          ) : (
+            <Text style={[logger.submitBtnText, { color: "#000" }]}>
+              SAVE BIOMETRICS
+            </Text>
+          )}
         </TouchableOpacity>
 
         <Text style={[logger.sectionTitle, { marginBottom: 15 }]}>
