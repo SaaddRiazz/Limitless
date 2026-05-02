@@ -168,6 +168,14 @@ export const logger = StyleSheet.create({
     marginBottom: 15,
     textTransform: "uppercase",
   },
+  inputGroup: {
+    backgroundColor: "#111",
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#222",
+    marginBottom: 10,
+  },
   largeValue: {
     color: "#fff",
     fontSize: 72,

@@ -6,4 +6,5 @@ export const colors = {
   cyan: "#35d7ff",
   purple: "#a29bfe",
   orange: "#dc6a00",
+  white: "#ffffff",
 };
