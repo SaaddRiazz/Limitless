@@ -1,3 +1,4 @@
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import EmailInput from "@/components/ui/email-input";
 import PasswordInput from "@/components/ui/password-input";
 import { supabase } from "@/lib/supabase";
@@ -12,6 +13,7 @@ export default function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [stayLoggedIn, setStayLoggedIn] = useState(true);
 
   const passwordRef = useRef<TextInput>(null);
 
@@ -25,7 +27,7 @@ export default function SignIn() {
     if (error) {
       Alert.alert("Error", error.message);
     } else if (data.session) {
-      // Explicitly redirect to the dashboard
+      // Note: persistence is handled globally by AsyncStorage in lib/supabase.ts
       router.replace("/App");
     }
     setLoading(false);
@@ -57,9 +59,30 @@ export default function SignIn() {
         />
       </View>
 
-      <TouchableOpacity style={auth.forgotButton}>
-        <Text style={auth.linkText}>Forgot Password?</Text>
-      </TouchableOpacity>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginTop: 15,
+        }}
+      >
+        <TouchableOpacity
+          onPress={() => setStayLoggedIn(!stayLoggedIn)}
+          style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
+        >
+          <MaterialCommunityIcons
+            name={stayLoggedIn ? "checkbox-marked" : "checkbox-blank-outline"}
+            size={22}
+            color={stayLoggedIn ? "#2196F3" : "#b3b3b3"}
+          />
+          <Text style={{ color: "#b3b3b3", fontSize: 14 }}>Stay Logged in</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={auth.forgotButton}>
+          <Text style={auth.linkText}>Forgot Password?</Text>
+        </TouchableOpacity>
+      </View>
 
       <TouchableOpacity
         style={[auth.loginButton, loading && { opacity: 0.5 }]}

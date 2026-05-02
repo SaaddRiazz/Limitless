@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import Markdown from "react-native-markdown-display";
 import { auth, main } from "../../styles/style";
 
 // Initialize Gemini API
@@ -59,13 +60,12 @@ export default function ChatScreen() {
 
       let model;
       try {
-        // Attempt to use the fast gemini-1.5-flash model
+        // User's specific model choice
         model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
         const prompt = `${SYSTEM_INSTRUCTION}\n\nUser: ${inputText}`;
         const result = await model.generateContent(prompt);
         var response = await result.response;
       } catch (e: any) {
-        // Fallback to gemini-pro if 404 or other error occurs
         console.warn("Falling back to gemini-pro due to error:", e.message);
         model = genAI.getGenerativeModel({ model: "gemini-pro" });
         const prompt = `${SYSTEM_INSTRUCTION}\n\nUser: ${inputText}`;
@@ -87,7 +87,7 @@ export default function ChatScreen() {
       console.error("Gemini Error:", error);
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: "Sorry, I encountered an error connecting to the trainers' network. Please try again in a moment.",
+        text: "Sorry, I encountered an error. Please try again.",
         sender: "ai",
         timestamp: new Date(),
       };
@@ -106,7 +106,13 @@ export default function ChatScreen() {
           isUser ? styles.userBubble : styles.aiBubble,
         ]}
       >
-        <Text style={styles.messageText}>{item.text}</Text>
+        {isUser ? (
+          <Text style={styles.messageText}>{item.text}</Text>
+        ) : (
+          <Markdown style={markdownStyles}>
+            {item.text}
+          </Markdown>
+        )}
         <Text style={styles.timestamp}>
           {item.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </Text>
@@ -115,35 +121,36 @@ export default function ChatScreen() {
   };
 
   return (
-    <View style={main.container}>
+    <View style={[main.container, { paddingTop: 40, paddingBottom: 0 }]}>
       <Text style={main.headerTitle}>TRAINER AI</Text>
 
-      <FlatList
-        ref={flatListRef}
-        data={messages}
-        renderItem={renderMessage}
-        keyExtractor={(item) => item.id}
-        inverted
-        contentContainerStyle={styles.chatList}
-        showsVerticalScrollIndicator={false}
-      />
-
-      {isLoading && (
-        <View style={styles.typingContainer}>
-          <ActivityIndicator size="small" color="#2196F3" />
-          <Text style={styles.typingText}>Limitless AI is typing...</Text>
-        </View>
-      )}
-
       <KeyboardAvoidingView
+        style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 25}
       >
+        <FlatList
+          ref={flatListRef}
+          data={messages}
+          renderItem={renderMessage}
+          keyExtractor={(item) => item.id}
+          inverted
+          contentContainerStyle={styles.chatList}
+          showsVerticalScrollIndicator={false}
+        />
+
+        {isLoading && (
+          <View style={styles.typingContainer}>
+            <ActivityIndicator size="small" color="#2196F3" />
+            <Text style={styles.typingText}>Limitless AI is typing...</Text>
+          </View>
+        )}
+
         <View style={styles.inputWrapper}>
           <View style={[auth.inputContainer, styles.inputContainerOverride]}>
             <TextInput
               style={auth.input}
-              placeholder="Ask about workouts, diet..."
+              placeholder="Ask me anything..."
               placeholderTextColor="#808080"
               value={inputText}
               onChangeText={setInputText}
@@ -163,12 +170,32 @@ export default function ChatScreen() {
   );
 }
 
+const markdownStyles = StyleSheet.create({
+  body: {
+    color: "#FFF",
+    fontSize: 16,
+    lineHeight: 22,
+  },
+  bullet_list: {
+    marginVertical: 10,
+  },
+  list_item: {
+    marginVertical: 2,
+  },
+  strong: {
+    fontWeight: "bold",
+    color: "#FFF",
+    fontSize: 18, // Increased from the body's 16
+    lineHeight: 24, // Adjusted slightly to maintain vertical rhythm
+  },
+});
+
 const styles = StyleSheet.create({
   chatList: {
     paddingBottom: 20,
   },
   messageBubble: {
-    maxWidth: "80%",
+    maxWidth: "85%",
     padding: 12,
     borderRadius: 15,
     marginBottom: 10,
@@ -196,7 +223,7 @@ const styles = StyleSheet.create({
   },
   inputWrapper: {
     paddingVertical: 10,
-    marginBottom: 20,
+    backgroundColor: "#00000a",
   },
   inputContainerOverride: {
     height: "auto",
