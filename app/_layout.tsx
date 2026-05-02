@@ -61,6 +61,10 @@ function RootLayoutNav() {
         options={{ title: "Chatbot", headerShown: false }}
       />
       <Stack.Screen
+        name="screens/chat-screen"
+        options={{ title: "AI Trainer", headerShown: false }}
+      />
+      <Stack.Screen
         name="screens/profile-screen"
         options={{ title: "Profile", headerShown: false }}
       />

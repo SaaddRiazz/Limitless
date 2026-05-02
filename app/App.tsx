@@ -2,7 +2,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import React, { ComponentProps } from "react";
 
-import ChatbotScreen from "./screens/chatbot-screen";
+import ChatScreen from "./screens/chat-screen";
 import HomeScreen from "./screens/home-screen";
 import LoggerScreen from "./screens/logger-screen";
 import ProfileScreen from "./screens/profile-screen";
@@ -47,7 +47,7 @@ export default function App() {
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Workout" component={WorkoutScreen} />
       <Tab.Screen name="Logger" component={LoggerScreen} />
-      <Tab.Screen name="Chat" component={ChatbotScreen} />
+      <Tab.Screen name="Chat" component={ChatScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );
