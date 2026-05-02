@@ -1,17 +1,32 @@
 import EmailInput from "@/components/ui/email-input";
 import PasswordInput from "@/components/ui/password-input";
+import { supabase } from "@/lib/supabase";
 import { auth } from "@/styles/style";
 import { useRouter } from "expo-router";
 import React, { useRef, useState } from "react";
-import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 export default function SignIn() {
   const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const passwordRef = useRef<TextInput>(null);
+
+  const signInWithEmail = async () => {
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email,
+      password: password,
+    });
+
+    if (error) {
+      Alert.alert("Error", error.message);
+    }
+    setLoading(false);
+  };
 
   return (
     <View style={auth.innerContainer}>
@@ -44,14 +59,15 @@ export default function SignIn() {
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={auth.loginButton}
-        onPress={() => router.push("/App")}
+        style={[auth.loginButton, loading && { opacity: 0.5 }]}
+        onPress={signInWithEmail}
+        disabled={loading}
       >
-        <Text style={auth.loginText}>SIGN IN</Text>
+        <Text style={auth.loginText}>{loading ? "SIGNING IN..." : "SIGN IN"}</Text>
       </TouchableOpacity>
 
       <View style={auth.registerContainer}>
-        <Text style={auth.registerText}>Don't have an account? </Text>
+        <Text style={auth.registerText}>Don&apos;t have an account? </Text>
         <TouchableOpacity onPress={() => router.push("/sign-up")}>
           <Text style={auth.linkText}>Register here.</Text>
         </TouchableOpacity>
