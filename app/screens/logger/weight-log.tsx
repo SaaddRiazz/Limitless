@@ -107,6 +107,7 @@ export default function WeightLog() {
           user_id: session.user.id,
           weight_kg: parseFloat(weight),
           height_cm: parseFloat(height),
+          bmi: parseFloat(bmiData.score),
         });
 
       if (error) throw error;
