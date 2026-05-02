@@ -40,7 +40,7 @@ export const auth = StyleSheet.create({
     color: "#ffffff",
     fontSize: 16,
   },
-  loginButton: {
+  filledBtn: {
     backgroundColor: "#2196F3",
     height: 55,
     borderRadius: 10,
@@ -49,7 +49,7 @@ export const auth = StyleSheet.create({
     marginTop: 25,
     elevation: 4,
   },
-  loginText: {
+  filledBtnText: {
     color: "#FFF",
     fontSize: 18,
     fontWeight: "bold",
@@ -77,7 +77,7 @@ export const main = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#00000a",
-    paddingTop: 60,
+    paddingTop: 30,
     paddingHorizontal: 20,
   },
   headerTitle: {
@@ -119,12 +119,12 @@ export const main = StyleSheet.create({
     flexDirection: "row",
   },
   levelContainer: {
-    backgroundColor: "rgba(33, 150, 243, 0.2)",
+    backgroundColor: "#2196f315",
     borderRadius: 15,
     padding: 15,
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: "rgba(33, 150, 243, 0.5)",
+    borderColor: "#2196f380",
   },
   progressBarBg: {
     height: 8,
@@ -139,13 +139,124 @@ export const main = StyleSheet.create({
     width: "65%",
   },
   workoutCard: {
-    backgroundColor: "rgba(33, 150, 243, 0.2)",
+    backgroundColor: "#2196f315",
     borderRadius: 20,
     padding: 25,
     borderWidth: 1,
-    borderColor: "rgba(33, 150, 243, 0.5)",
+    borderColor: "#2196f380",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+  },
+});
+
+export const logger = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+  },
+  centerWrapper: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  sectionTitle: {
+    color: "rgba(255,255,255,0.4)",
+    fontSize: 12,
+    fontWeight: "800",
+    letterSpacing: 2,
+    marginBottom: 15,
+    textTransform: "uppercase",
+  },
+  largeValue: {
+    color: "#fff",
+    fontSize: 72,
+    fontWeight: "900",
+    marginTop: 10,
+  },
+  unitText: {
+    fontSize: 24,
+    color: "rgba(255,255,255,0.5)",
+  },
+  quickAddGrid: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 40,
+    gap: 10,
+  },
+  quickAddBtn: {
+    flex: 1,
+    backgroundColor: "#0a0a1a",
+    paddingVertical: 20,
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: "#333",
+    alignItems: "center",
+  },
+  macroContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    backgroundColor: "#111",
+    padding: 20,
+    borderRadius: 20,
+    marginTop: 20,
+    borderWidth: 1,
+    borderColor: "#222",
+  },
+  macroItem: {
+    alignItems: "center",
+  },
+  macroLabel: {
+    color: "#888",
+    fontSize: 11,
+    fontWeight: "bold",
+    marginBottom: 4,
+  },
+  photoGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
+  photoSlot: {
+    width: "48%",
+    aspectRatio: 1,
+    backgroundColor: "#111",
+    borderRadius: 15,
+    marginBottom: 15,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderStyle: "dashed",
+    borderColor: "#333",
+  },
+  exerciseCard: {
+    backgroundColor: "#111",
+    padding: 18,
+    borderRadius: 15,
+    marginBottom: 15,
+    borderLeftWidth: 4,
+  },
+  setInput: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: "#222",
+  },
+  submitBtn: {
+    height: 60,
+    borderRadius: 15,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: "auto",
+    marginBottom: 20,
+  },
+  submitBtnText: {
+    color: "#000",
+    fontWeight: "900",
+    fontSize: 16,
+    letterSpacing: 1,
   },
 });

@@ -11,6 +11,7 @@ import {
   View,
 } from "react-native";
 import DashboardCard from "../../components/ui/dashboard-card";
+import { colors } from "../../styles/colors";
 import { auth, main } from "../../styles/style";
 
 export default function HomeScreen({ navigation }: any) {
@@ -104,7 +105,7 @@ export default function HomeScreen({ navigation }: any) {
           <Text style={{ color: "#fff", fontWeight: "bold" }}>
             Level {profile.level}
           </Text>
-          <Text style={{ color: "#2196F3", fontWeight: "bold" }}>
+          <Text style={{ color: colors.blue, fontWeight: "bold" }}>
             {profile.xp.toLocaleString()} / {nextLevelXP.toLocaleString()} XP
           </Text>
         </View>
@@ -140,35 +141,35 @@ export default function HomeScreen({ navigation }: any) {
             icon="fire"
             value={profile.streak.toString()}
             onPress={() => {}}
-            hexColor={"#dc6a00"}
+            hexColor={colors.orange}
           />
           <DashboardCard
             title="Steps"
             icon="run"
             value="8,432"
             onPress={() => {}}
-            hexColor={"#ff0000"}
+            hexColor={colors.red}
           />
           <DashboardCard
             title="Sleep"
             icon="weather-night"
             value="7h 20m"
             onPress={() => {}}
-            hexColor={"#fffa64"}
+            hexColor={colors.yellow}
           />
           <DashboardCard
             title="Calories"
             icon="food-apple"
             value="1,450"
             onPress={() => {}}
-            hexColor={"#69ff3c"}
+            hexColor={colors.green}
           />
           <DashboardCard
             title="Water"
             icon="water"
             value="1.5L"
             onPress={() => {}}
-            hexColor={"#35d7ff"}
+            hexColor={colors.cyan}
           />
         </ScrollView>
       </View>

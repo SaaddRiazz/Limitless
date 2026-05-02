@@ -1,3 +1,5 @@
+import { DarkTheme, ThemeProvider } from "@react-navigation/native";
+import { Stack } from "expo-router";
 import {
   DarkTheme,
   DefaultTheme,
@@ -8,6 +10,18 @@ import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import "react-native-reanimated";
 
+import { View } from "react-native";
+
+const LimitlessTheme = {
+  ...DarkTheme,
+  colors: {
+    ...DarkTheme.colors,
+    background: "#000000",
+    card: "#00000a",
+    text: "#ffffff",
+    border: "#2e2e2e",
+  },
+};
 import { AuthProvider, useAuth } from "@/context/auth";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
@@ -64,13 +78,32 @@ function RootLayoutNav() {
         name="screens/profile-screen"
         options={{ title: "Profile", headerShown: false }}
       />
+      
+      <Stack.Screen
+        name="screens/logger/workout-log"
+        options={{ title: "Workout Log", headerShown: false }}
+      />
+      <Stack.Screen
+        name="screens/logger/nutrition-log"
+        options={{ title: "Nutrition Log", headerShown: false }}
+      />
+      <Stack.Screen
+        name="screens/logger/weight-log"
+        options={{ title: "Weight Log", headerShown: false }}
+      />
+      <Stack.Screen
+        name="screens/logger/water-log"
+        options={{ title: "Water Log", headerShown: false }}
+      />
+      <Stack.Screen
+        name="screens/logger/photos-log"
+        options={{ title: "Photos Log", headerShown: false }}
+      />
     </Stack>
   );
 }
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <AuthProvider>
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>

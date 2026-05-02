@@ -123,11 +123,11 @@ export default function SignUp() {
       </View>
 
       <TouchableOpacity
-        style={[auth.loginButton, loading && { opacity: 0.5 }]}
+        style={[auth.filledBtn, loading && { opacity: 0.5 }]}
         onPress={showOtp ? verifyOtp : signUpWithEmail}
         disabled={loading}
       >
-        <Text style={auth.loginText}>
+        <Text style={auth.filledBtnText}>
           {loading
             ? (showOtp ? "VERIFYING..." : "SIGNING UP...")
             : (showOtp ? "VERIFY CODE" : "SIGN UP")}

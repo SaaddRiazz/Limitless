@@ -62,11 +62,11 @@ export default function SignIn() {
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={[auth.loginButton, loading && { opacity: 0.5 }]}
+        style={[auth.filledBtn, loading && { opacity: 0.5 }]}
         onPress={signInWithEmail}
         disabled={loading}
       >
-        <Text style={auth.loginText}>{loading ? "SIGNING IN..." : "SIGN IN"}</Text>
+        <Text style={auth.filledBtnText}>{loading ? "SIGNING IN..." : "SIGN IN"}</Text>
       </TouchableOpacity>
 
       <View style={auth.registerContainer}>
