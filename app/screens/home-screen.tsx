@@ -1,6 +1,8 @@
+import { supabase } from "@/lib/supabase";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Animated,
   Easing,
   ScrollView,
@@ -12,23 +14,77 @@ import DashboardCard from "../../components/ui/dashboard-card";
 import { auth, main } from "../../styles/style";
 
 export default function HomeScreen({ navigation }: any) {
-  const currentXP = 1090;
+  const [profile, setProfile] = useState({
+    username: "CHAMPION",
+    xp: 0,
+    level: 1,
+    streak: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
   const nextLevelXP = 2000;
   const progressPercent = Math.min(
-    Math.max((currentXP / nextLevelXP) * 100, 0),
-    100,
+    Math.max((profile.xp / nextLevelXP) * 100, 0),
+    100
   );
 
   const animatedWidth = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    Animated.timing(animatedWidth, {
-      toValue: progressPercent,
-      duration: 1500,
-      easing: Easing.out(Easing.exp),
-      useNativeDriver: false,
-    }).start();
-  }, [progressPercent]);
+    fetchProfile();
+  }, []);
+
+  useEffect(() => {
+    if (!loading) {
+      Animated.timing(animatedWidth, {
+        toValue: progressPercent,
+        duration: 1500,
+        easing: Easing.out(Easing.exp),
+        useNativeDriver: false,
+      }).start();
+    }
+  }, [progressPercent, loading]);
+
+  async function fetchProfile() {
+    try {
+      setLoading(true);
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const user = session?.user;
+
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("username, xp, level, streak")
+        .eq("id", user.id)
+        .single();
+
+      if (error) {
+        console.error("Error fetching home profile:", error.message);
+      } else if (data) {
+        setProfile({
+          username: data.username || "CHAMPION",
+          xp: data.xp || 0,
+          level: data.level || 1,
+          streak: data.streak || 0,
+        });
+      }
+    } catch (error) {
+      console.error("Unexpected error fetching profile:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (loading && profile.xp === 0) {
+    return (
+      <View style={[main.container, { justifyContent: "center" }]}>
+        <ActivityIndicator size="large" color="#2196F3" />
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={main.container} showsVerticalScrollIndicator={false}>
@@ -36,7 +92,7 @@ export default function HomeScreen({ navigation }: any) {
         <Text style={[auth.welcomeText, { marginBottom: 5, marginTop: 30 }]}>
           Welcome back,
         </Text>
-        <Text style={main.headerTitle}>CHAMPION</Text>
+        <Text style={main.headerTitle}>{profile.username.toUpperCase()}</Text>
       </View>
 
       <TouchableOpacity
@@ -45,9 +101,11 @@ export default function HomeScreen({ navigation }: any) {
         onPress={() => navigation.navigate("Profile")}
       >
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-          <Text style={{ color: "#fff", fontWeight: "bold" }}>Level 12</Text>
+          <Text style={{ color: "#fff", fontWeight: "bold" }}>
+            Level {profile.level}
+          </Text>
           <Text style={{ color: "#2196F3", fontWeight: "bold" }}>
-            {currentXP.toLocaleString()} / {nextLevelXP.toLocaleString()} XP
+            {profile.xp.toLocaleString()} / {nextLevelXP.toLocaleString()} XP
           </Text>
         </View>
 
@@ -80,7 +138,7 @@ export default function HomeScreen({ navigation }: any) {
           <DashboardCard
             title="Streak"
             icon="fire"
-            value="28"
+            value={profile.streak.toString()}
             onPress={() => {}}
             hexColor={"#dc6a00"}
           />

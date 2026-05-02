@@ -17,13 +17,16 @@ export default function SignIn() {
 
   const signInWithEmail = async () => {
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email: email,
       password: password,
     });
 
     if (error) {
       Alert.alert("Error", error.message);
+    } else if (data.session) {
+      // Explicitly redirect to the dashboard
+      router.replace("/App");
     }
     setLoading(false);
   };

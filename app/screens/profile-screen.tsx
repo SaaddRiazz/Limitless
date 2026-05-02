@@ -2,10 +2,12 @@ import { supabase } from "@/lib/supabase";
 import { decode } from "base64-arraybuffer";
 import * as FileSystem from "expo-file-system/legacy";
 import * as ImagePicker from "expo-image-picker";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Animated,
+  Easing,
   Image,
   ScrollView,
   Text,
@@ -21,14 +23,30 @@ export default function ProfileScreen() {
   const [username, setUsername] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [xp, setXp] = useState(0);
+  const [level, setLevel] = useState(1);
   const [message, setMessage] = useState<{
     text: string;
     type: "success" | "error";
   } | null>(null);
 
+  const nextLevelXP = 2000; // You can adjust this logic based on your level system
+  const progressPercent = Math.min(Math.max((xp / nextLevelXP) * 100, 0), 100);
+  const animatedWidth = useRef(new Animated.Value(0)).current;
+
   useEffect(() => {
     getProfile();
   }, []);
+
+  useEffect(() => {
+    if (!loading) {
+      Animated.timing(animatedWidth, {
+        toValue: progressPercent,
+        duration: 1500,
+        easing: Easing.out(Easing.exp),
+        useNativeDriver: false,
+      }).start();
+    }
+  }, [progressPercent, loading]);
 
   async function getProfile() {
     try {
@@ -42,7 +60,7 @@ export default function ProfileScreen() {
 
       const { data, error, status } = await supabase
         .from("profiles")
-        .select(`username, avatar_url, xp`)
+        .select(`username, avatar_url, xp, level`)
         .eq("id", user.id)
         .single();
 
@@ -54,6 +72,7 @@ export default function ProfileScreen() {
         setUsername(data.username || "");
         setAvatarUrl(data.avatar_url);
         setXp(data.xp || 0);
+        setLevel(data.level || 1);
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -93,7 +112,6 @@ export default function ProfileScreen() {
         updated_at: new Date().toISOString(),
       };
 
-      // Ensure id: user.id is used for the upsert logic
       const { data, error } = await supabase
         .from("profiles")
         .upsert(updates, { onConflict: "id" })
@@ -139,27 +157,23 @@ export default function ProfileScreen() {
 
   async function uploadAvatar(uri: string) {
     try {
-      console.log("papapatututut");
       setUploading(true);
       setMessage(null);
+
       const {
         data: { session },
       } = await supabase.auth.getSession();
       const user = session?.user;
       if (!user) throw new Error("No user session found. Please log in again.");
 
-      // 1. Read file as base64 using legacy expo-file-system
       const base64 = await FileSystem.readAsStringAsync(uri, {
         encoding: "base64",
       });
-
-      // 2. Convert base64 to ArrayBuffer (more stable for Supabase in React Native)
       const arrayBuffer = decode(base64);
 
       const fileExt = uri.split(".").pop()?.toLowerCase() ?? "jpeg";
       const path = `${user.id}/${Date.now()}.${fileExt}`;
 
-      // 3. Upload ArrayBuffer to Supabase Storage
       const { data, error } = await supabase.storage
         .from("avatars")
         .upload(path, arrayBuffer, {
@@ -174,8 +188,6 @@ export default function ProfileScreen() {
       } = supabase.storage.from("avatars").getPublicUrl(data.path);
 
       setAvatarUrl(publicUrl);
-
-      // 4. Update the profile with the new URL
       await updateProfile({ username, avatar_url: publicUrl });
     } catch (error) {
       console.error("Upload Error:", error);
@@ -234,17 +246,26 @@ export default function ProfileScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* XP Card */}
+      {/* XP Card - Matched with Dashboard */}
       <View style={main.levelContainer}>
-        <Text style={[main.cardTitle, { color: "#fff", fontSize: 16 }]}>
-          Current XP
-        </Text>
-        <Text style={[main.statsValue, { fontSize: 32, color: "#2196F3" }]}>
-          {xp} XP
-        </Text>
+        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+          <Text style={{ color: "#fff", fontWeight: "bold" }}>Level {level}</Text>
+          <Text style={{ color: "#2196F3", fontWeight: "bold" }}>
+            {xp.toLocaleString()} / {nextLevelXP.toLocaleString()} XP
+          </Text>
+        </View>
+
         <View style={main.progressBarBg}>
-          <View
-            style={[main.progressBarFill, { width: `${(xp % 1000) / 10}%` }]}
+          <Animated.View
+            style={[
+              main.progressBarFill,
+              {
+                width: animatedWidth.interpolate({
+                  inputRange: [0, 100],
+                  outputRange: ["0%", "100%"],
+                }),
+              },
+            ]}
           />
         </View>
       </View>
