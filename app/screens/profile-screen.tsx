@@ -121,7 +121,7 @@ export default function ProfileScreen() {
 
       if (!data || data.length === 0) {
         throw new Error(
-          "The update was accepted but no rows were changed. Check your RLS policies!"
+          "The update was accepted but no rows were changed. Check your RLS policies!",
         );
       }
 
@@ -249,7 +249,9 @@ export default function ProfileScreen() {
       {/* XP Card - Matched with Dashboard */}
       <View style={main.levelContainer}>
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-          <Text style={{ color: "#fff", fontWeight: "bold" }}>Level {level}</Text>
+          <Text style={{ color: "#fff", fontWeight: "bold" }}>
+            Level {level}
+          </Text>
           <Text style={{ color: "#2196F3", fontWeight: "bold" }}>
             {xp.toLocaleString()} / {nextLevelXP.toLocaleString()} XP
           </Text>
@@ -286,13 +288,13 @@ export default function ProfileScreen() {
 
       {/* Save Button */}
       <TouchableOpacity
-        style={[auth.loginButton, (loading || uploading) && { opacity: 0.5 }]}
+        style={[auth.filledBtn, (loading || uploading) && { opacity: 0.5 }]}
         onPress={() => updateProfile({ username, avatar_url: avatarUrl })}
         disabled={loading || uploading}
       >
         <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
           {loading && <ActivityIndicator color="#fff" size="small" />}
-          <Text style={auth.loginText}>SAVE PROFILE</Text>
+          <Text style={auth.filledBtnText}>SAVE PROFILE</Text>
         </View>
       </TouchableOpacity>
 
@@ -313,10 +315,10 @@ export default function ProfileScreen() {
 
       {/* Logout Button */}
       <TouchableOpacity
-        style={[auth.loginButton, { backgroundColor: "#f44336", marginTop: 20 }]}
+        style={[auth.filledBtn, { backgroundColor: "#f44336", marginTop: 20 }]}
         onPress={handleLogout}
       >
-        <Text style={auth.loginText}>LOGOUT</Text>
+        <Text style={auth.filledBtnText}>LOGOUT</Text>
       </TouchableOpacity>
     </ScrollView>
   );

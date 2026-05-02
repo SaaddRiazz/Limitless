@@ -36,7 +36,10 @@ export default function SignUp() {
     } else {
       // Move to OTP verification step
       setShowOtp(true);
-      Alert.alert("Verify Email", "A 6-digit code has been sent to your email.");
+      Alert.alert(
+        "Verify Email",
+        "A 6-digit code has been sent to your email.",
+      );
     }
     setLoading(false);
   };
@@ -68,7 +71,9 @@ export default function SignUp() {
     <View style={auth.innerContainer}>
       <Text style={auth.logo}>LIMITLESS</Text>
       <Text style={auth.welcomeText}>
-        {showOtp ? "Enter the code sent to your email." : (
+        {showOtp ? (
+          "Enter the code sent to your email."
+        ) : (
           <>
             Never <Text style={{ color: "#fff" }}>Done. </Text>
             Only <Text style={{ color: "#fff" }}>Next.</Text>
@@ -129,8 +134,12 @@ export default function SignUp() {
       >
         <Text style={auth.filledBtnText}>
           {loading
-            ? (showOtp ? "VERIFYING..." : "SIGNING UP...")
-            : (showOtp ? "VERIFY CODE" : "SIGN UP")}
+            ? showOtp
+              ? "VERIFYING..."
+              : "SIGNING UP..."
+            : showOtp
+              ? "VERIFY CODE"
+              : "SIGN UP"}
         </Text>
       </TouchableOpacity>
 
@@ -139,7 +148,7 @@ export default function SignUp() {
           {showOtp ? "Didn't get a code?" : "Already have an account?"}
         </Text>
         <TouchableOpacity
-          onPress={() => showOtp ? setShowOtp(false) : router.back()}
+          onPress={() => (showOtp ? setShowOtp(false) : router.back())}
         >
           <Text style={auth.linkText}>
             {showOtp ? " Go back." : " Sign in."}

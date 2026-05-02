@@ -1,15 +1,10 @@
 import { DarkTheme, ThemeProvider } from "@react-navigation/native";
-import { Stack } from "expo-router";
-import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
-} from "@react-navigation/native";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect } from "react";
 import "react-native-reanimated";
 
+import { AuthProvider, useAuth } from "@/context/auth";
 import { View } from "react-native";
 
 const LimitlessTheme = {
@@ -22,8 +17,6 @@ const LimitlessTheme = {
     border: "#2e2e2e",
   },
 };
-import { AuthProvider, useAuth } from "@/context/auth";
-import { useColorScheme } from "@/hooks/use-color-scheme";
 
 function RootLayoutNav() {
   const { session, isLoading } = useAuth();
@@ -46,10 +39,7 @@ function RootLayoutNav() {
 
   return (
     <Stack>
-      <Stack.Screen
-        name="index"
-        options={{ headerShown: false }}
-      />
+      <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen
         name="sign-in"
         options={{ title: "Log In", headerShown: false }}
@@ -86,7 +76,7 @@ function RootLayoutNav() {
         name="screens/profile-screen"
         options={{ title: "Profile", headerShown: false }}
       />
-      
+
       <Stack.Screen
         name="screens/logger/workout-log"
         options={{ title: "Workout Log", headerShown: false }}
@@ -113,11 +103,13 @@ function RootLayoutNav() {
 
 export default function RootLayout() {
   return (
-    <AuthProvider>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        <RootLayoutNav />
-        <StatusBar style="auto" />
-      </ThemeProvider>
-    </AuthProvider>
+    <View style={{ flex: 1, backgroundColor: "#00000a" }}>
+      <AuthProvider>
+        <ThemeProvider value={LimitlessTheme}>
+          <RootLayoutNav />
+          <StatusBar style="auto" />
+        </ThemeProvider>
+      </AuthProvider>
+    </View>
   );
 }
