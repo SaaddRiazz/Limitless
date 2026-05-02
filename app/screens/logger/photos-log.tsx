@@ -1,4 +1,6 @@
+import { BackButton } from "@/components/ui/back-button";
 import { supabase } from "@/lib/supabase";
+import { colors } from "@/styles/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { decode } from "base64-arraybuffer";
 import * as FileSystem from "expo-file-system/legacy";
@@ -43,7 +45,9 @@ export default function PhotosLog() {
   async function fetchPhotos() {
     try {
       setLoading(true);
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (!session) return;
 
       const { data, error } = await supabase
@@ -81,7 +85,9 @@ export default function PhotosLog() {
   async function uploadPhoto(uri: string) {
     try {
       setUploading(true);
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (!session) throw new Error("No session");
 
       const base64 = await FileSystem.readAsStringAsync(uri, {
@@ -101,7 +107,9 @@ export default function PhotosLog() {
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
+      const {
+        data: { publicUrl },
+      } = supabase.storage
         .from("progress_photos")
         .getPublicUrl(uploadData.path);
 
@@ -152,7 +160,7 @@ export default function PhotosLog() {
             }
           },
         },
-      ]
+      ],
     );
   }
 
@@ -162,9 +170,9 @@ export default function PhotosLog() {
       activeOpacity={0.8}
       style={styles.photoContainer}
     >
-      <Image 
-        source={{ uri: item.image_url }} 
-        style={styles.photo} 
+      <Image
+        source={{ uri: item.image_url }}
+        style={styles.photo}
         key={item.id}
       />
     </TouchableOpacity>
@@ -175,7 +183,29 @@ export default function PhotosLog() {
 
   return (
     <View style={main.container}>
-      <Text style={[logger.sectionTitle, { marginTop: 10 }]}>Gains Gallery</Text>
+      <BackButton color={colors.purple} />
+      <Text style={[logger.sectionTitle, { marginTop: 10 }]}>
+        Gains Gallery
+      </Text>
+
+      <TouchableOpacity
+        onPress={handleAddPhoto}
+        disabled={uploading}
+        style={[styles.addSlot, uploading && { opacity: 0.5 }]}
+      >
+        {uploading ? (
+          <ActivityIndicator color="#a29bfe" />
+        ) : (
+          <>
+            <MaterialCommunityIcons
+              name="camera-plus"
+              size={32}
+              color="#a29bfe"
+            />
+            <Text style={styles.addText}>NEW ENTRY</Text>
+          </>
+        )}
+      </TouchableOpacity>
 
       {loading ? (
         <View style={styles.center}>
@@ -190,34 +220,17 @@ export default function PhotosLog() {
           contentContainerStyle={styles.listContent}
           columnWrapperStyle={styles.columnWrapper}
           showsVerticalScrollIndicator={false}
-          ListHeaderComponent={
-            <TouchableOpacity
-              onPress={handleAddPhoto}
-              disabled={uploading}
-              style={[styles.addSlot, uploading && { opacity: 0.5 }]}
-            >
-              {uploading ? (
-                <ActivityIndicator color="#a29bfe" />
-              ) : (
-                <>
-                  <MaterialCommunityIcons
-                    name="camera-plus"
-                    size={32}
-                    color="#a29bfe"
-                  />
-                  <Text style={styles.addText}>NEW ENTRY</Text>
-                </>
-              )}
-            </TouchableOpacity>
-          }
         />
       )}
 
-      {/* Old Style Compare Button at the bottom */}
       {!loading && (
         <View style={{ paddingVertical: 20 }}>
           <TouchableOpacity
-            style={[logger.submitBtn, { backgroundColor: "#a29bfe" }, photos.length < 2 && { opacity: 0.5 }]}
+            style={[
+              logger.submitBtn,
+              { backgroundColor: "#a29bfe" },
+              photos.length < 2 && { opacity: 0.5 },
+            ]}
             onPress={() => setCompareModalVisible(true)}
             disabled={photos.length < 2}
           >
@@ -226,7 +239,6 @@ export default function PhotosLog() {
         </View>
       )}
 
-      {/* Comparison Modal */}
       <Modal
         visible={compareModalVisible}
         transparent
@@ -252,7 +264,9 @@ export default function PhotosLog() {
                 </View>
                 <Text style={styles.compareLabel}>INITIAL</Text>
                 <Text style={styles.dateLabel}>
-                  {initialPhoto ? new Date(initialPhoto.created_at).toLocaleDateString() : ""}
+                  {initialPhoto
+                    ? new Date(initialPhoto.created_at).toLocaleDateString()
+                    : ""}
                 </Text>
               </View>
 
@@ -265,7 +279,9 @@ export default function PhotosLog() {
                 </View>
                 <Text style={styles.compareLabel}>CURRENT</Text>
                 <Text style={styles.dateLabel}>
-                  {currentPhoto ? new Date(currentPhoto.created_at).toLocaleDateString() : ""}
+                  {currentPhoto
+                    ? new Date(currentPhoto.created_at).toLocaleDateString()
+                    : ""}
                 </Text>
               </View>
             </View>
@@ -297,7 +313,7 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
   },
   addSlot: {
-    width: ITEM_SIZE,
+    width: "100%",
     height: ITEM_SIZE,
     borderRadius: 12,
     borderWidth: 1,
