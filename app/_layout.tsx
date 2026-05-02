@@ -5,7 +5,7 @@ import {
 } from "@react-navigation/native";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import "react-native-reanimated";
 
 import { AuthProvider, useAuth } from "@/context/auth";
@@ -20,12 +20,11 @@ function RootLayoutNav() {
     if (isLoading) return;
 
     const inAuthGroup = segments[0] === "sign-in" || segments[0] === "sign-up";
-    const isAtRoot = segments.length === 0 || (segments.length === 1 && segments[0] === "(tabs)"); // Adjust based on your actual structure
 
     if (!session && !inAuthGroup) {
       // Redirect to sign-in if not logged in
       router.replace("/sign-in");
-    } else if (session && (inAuthGroup || segments.length === 0)) {
+    } else if (session && (inAuthGroup || !segments[0])) {
       // Redirect to main app if logged in and at root or auth screens
       router.replace("/App");
     }
@@ -33,6 +32,10 @@ function RootLayoutNav() {
 
   return (
     <Stack>
+      <Stack.Screen
+        name="index"
+        options={{ headerShown: false }}
+      />
       <Stack.Screen
         name="sign-in"
         options={{ title: "Log In", headerShown: false }}
