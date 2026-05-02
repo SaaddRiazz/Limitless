@@ -36,7 +36,7 @@ export default function WeightLog() {
 
       const { data: latest_data, error: latest_error } = await supabase
         .from("biometrics")
-        .select("weight, height")
+        .select("weight_kg, height_cm")
         .eq("user_id", user_id)
         .order("created_at", { ascending: false })
         .limit(1);
@@ -44,13 +44,13 @@ export default function WeightLog() {
       if (latest_error) throw latest_error;
 
       if (latest_data && latest_data.length > 0) {
-        setWeight(latest_data[0].weight.toString());
-        setHeight(latest_data[0].height.toString());
+        setWeight(latest_data[0].weight_kg.toString());
+        setHeight(latest_data[0].height_cm.toString());
       }
 
       const { data: history_data, error: history_error } = await supabase
         .from("biometrics")
-        .select("weight, created_at")
+        .select("weight_kg, created_at")
         .eq("user_id", user_id)
         .order("created_at", { ascending: true })
         .limit(15);
@@ -62,7 +62,7 @@ export default function WeightLog() {
           month: "2-digit",
           day: "2-digit",
         }),
-        val: item.weight,
+        val: item.weight_kg,
       }));
 
       setHistory(formatted_history);
@@ -105,8 +105,8 @@ export default function WeightLog() {
         .from("biometrics")
         .insert({
           user_id: session.user.id,
-          weight: parseFloat(weight),
-          height: parseFloat(height),
+          weight_kg: parseFloat(weight),
+          height_cm: parseFloat(height),
         });
 
       if (error) throw error;
@@ -120,10 +120,10 @@ export default function WeightLog() {
   };
 
   const chartData = {
-    labels: history.slice(-5).map((h) => h.date),
+    labels: history.length > 0 ? history.slice(-5).map((h) => h.date) : ["-"],
     datasets: [
       {
-        data: history.slice(-15).map((h) => Number(h.val)),
+        data: history.length > 0 ? history.slice(-15).map((h) => Number(h.val)) : [0],
         color: () => colors.yellow,
         strokeWidth: 3,
       },
