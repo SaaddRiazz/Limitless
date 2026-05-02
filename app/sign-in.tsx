@@ -44,10 +44,10 @@ export default function SignIn() {
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={auth.loginButton}
+        style={auth.filledBtn}
         onPress={() => router.push("/App")}
       >
-        <Text style={auth.loginText}>SIGN IN</Text>
+        <Text style={auth.filledBtnText}>SIGN IN</Text>
       </TouchableOpacity>
 
       <View style={auth.registerContainer}>

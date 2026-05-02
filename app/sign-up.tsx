@@ -52,10 +52,10 @@ export default function SignUp() {
       </View>
 
       <TouchableOpacity
-        style={auth.loginButton}
+        style={auth.filledBtn}
         onPress={() => router.push("/App")}
       >
-        <Text style={auth.loginText}>SIGN UP</Text>
+        <Text style={auth.filledBtnText}>SIGN UP</Text>
       </TouchableOpacity>
 
       <View style={auth.registerContainer}>

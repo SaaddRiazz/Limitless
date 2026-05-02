@@ -40,7 +40,7 @@ export const auth = StyleSheet.create({
     color: "#ffffff",
     fontSize: 16,
   },
-  loginButton: {
+  filledBtn: {
     backgroundColor: "#2196F3",
     height: 55,
     borderRadius: 10,
@@ -49,7 +49,7 @@ export const auth = StyleSheet.create({
     marginTop: 25,
     elevation: 4,
   },
-  loginText: {
+  filledBtnText: {
     color: "#FFF",
     fontSize: 18,
     fontWeight: "bold",
@@ -77,7 +77,7 @@ export const main = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#00000a",
-    paddingTop: 60,
+    paddingTop: 30,
     paddingHorizontal: 20,
   },
   headerTitle: {

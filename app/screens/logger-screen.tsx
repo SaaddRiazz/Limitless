@@ -1,3 +1,4 @@
+import { colors } from "@/styles/colors";
 import { useRouter } from "expo-router";
 import React from "react";
 import { ScrollView, Text } from "react-native";
@@ -22,7 +23,7 @@ export default function LoggerScreen() {
         title="Workout"
         subtitle="Log sets, reps & weight"
         icon="dumbbell"
-        hexColor="#2196F3"
+        hexColor={colors.blue}
         onPress={() => router.push("/screens/logger/workout-log")}
       />
 
@@ -30,7 +31,7 @@ export default function LoggerScreen() {
         title="Nutrition"
         subtitle="Track calories & macros"
         icon="food-apple"
-        hexColor="#69ff3c"
+        hexColor={colors.green}
         onPress={() => router.push("/screens/logger/nutrition-log")}
       />
 
@@ -38,21 +39,21 @@ export default function LoggerScreen() {
         title="Body Weight"
         subtitle="Update your current weight"
         icon="scale-bathroom"
-        hexColor="#fffa64"
+        hexColor={colors.yellow}
         onPress={() => router.push("/screens/logger/weight-log")}
       />
       <LoggerCard
         title="Hydration"
         subtitle="Monitor daily fluid balance"
         icon="water"
-        hexColor="#35d7ff"
+        hexColor={colors.cyan}
         onPress={() => router.push("/screens/logger/water-log")}
       />
       <LoggerCard
         title="Progress Photos"
         subtitle="Visualize the transformation"
         icon="camera-iris"
-        hexColor="#a29bfe"
+        hexColor={colors.purple}
         onPress={() => router.push("/screens/logger/photos-log")}
       />
     </ScrollView>
