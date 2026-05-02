@@ -119,12 +119,12 @@ export const main = StyleSheet.create({
     flexDirection: "row",
   },
   levelContainer: {
-    backgroundColor: "rgba(33, 150, 243, 0.2)",
+    backgroundColor: "#2196f315",
     borderRadius: 15,
     padding: 15,
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: "rgba(33, 150, 243, 0.5)",
+    borderColor: "#2196f380",
   },
   progressBarBg: {
     height: 8,
@@ -139,11 +139,11 @@ export const main = StyleSheet.create({
     width: "65%",
   },
   workoutCard: {
-    backgroundColor: "rgba(33, 150, 243, 0.2)",
+    backgroundColor: "#2196f315",
     borderRadius: 20,
     padding: 25,
     borderWidth: 1,
-    borderColor: "rgba(33, 150, 243, 0.5)",
+    borderColor: "#2196f380",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",

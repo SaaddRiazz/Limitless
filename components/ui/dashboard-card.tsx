@@ -23,7 +23,7 @@ const DashboardCard: React.FC<DashboardCardProps> = ({
       main.card,
       {
         borderColor: `${hexColor}80`,
-        backgroundColor: `${hexColor}33`,
+        backgroundColor: `${hexColor}15`,
       },
     ]}
     onPress={onPress}
