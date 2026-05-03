@@ -1,8 +1,7 @@
-import { HistoryCard } from "@/components/ui/history-card";
+import { WorkoutPlanCard } from "@/components/ui/workout-plan-card";
 import { supabase } from "@/lib/supabase";
 import { colors } from "@/styles/colors";
 import { auth, logger, main } from "@/styles/style";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
@@ -22,13 +21,15 @@ export default function WorkoutScreen() {
   useFocusEffect(
     useCallback(() => {
       fetchPlans();
-    }, [])
+    }, []),
   );
 
   const fetchPlans = async () => {
     try {
       setLoading(true);
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (!session) return;
 
       const { data, error } = await supabase
@@ -38,19 +39,34 @@ export default function WorkoutScreen() {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      console.log(`Fetched ${data?.length || 0} workout plans`);
       setSavedPlans(data || []);
     } catch (error: any) {
-      console.error("Fetch Error:", error.message);
       Alert.alert("Error", "Failed to load workout plans.");
     } finally {
       setLoading(false);
     }
   };
 
-  const getPlanColor = (index: number) => {
-    const palette = [colors.blue, colors.green, colors.orange, colors.red, colors.purple];
-    return palette[index % palette.length];
+  const handleDeletePlan = async (id: string) => {
+    Alert.alert(
+      "Delete Plan",
+      "Are you sure you want to delete this routine?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            const { error } = await supabase
+              .from("workout_plans")
+              .delete()
+              .eq("id", id);
+            if (error) Alert.alert("Error", "Could not delete plan.");
+            else fetchPlans();
+          },
+        },
+      ],
+    );
   };
 
   return (
@@ -77,7 +93,6 @@ export default function WorkoutScreen() {
           ]}
           onPress={() => router.push("/screens/tracking/add-workout-plan")}
         >
-          <MaterialCommunityIcons name="plus" size={24} color={colors.white} />
           <Text style={auth.filledBtnText}>ADD WORKOUT PLAN</Text>
         </TouchableOpacity>
 
@@ -88,19 +103,25 @@ export default function WorkoutScreen() {
         </Text>
 
         {loading ? (
-          <ActivityIndicator size="large" color={colors.blue} style={{ marginTop: 50 }} />
+          <ActivityIndicator
+            size="large"
+            color={colors.blue}
+            style={{ marginTop: 50 }}
+          />
         ) : savedPlans.length > 0 ? (
           savedPlans.map((plan, index) => (
-            <HistoryCard
+            <WorkoutPlanCard
               key={plan.id}
               title={plan.name}
               subtitle={plan.description || "No description"}
-              color={getPlanColor(index)}
-              onPress={() => router.push({
-                pathname: "/screens/tracking/track-workout",
-                params: { planId: plan.id, planName: plan.name }
-              })}
-              date={new Date(plan.created_at).toLocaleDateString()}
+              color={colors.blue}
+              onPress={() =>
+                router.push({
+                  pathname: "/screens/tracking/edit-workout-plan",
+                  params: { planId: plan.id },
+                })
+              }
+              onDelete={() => handleDeletePlan(plan.id)}
             />
           ))
         ) : (

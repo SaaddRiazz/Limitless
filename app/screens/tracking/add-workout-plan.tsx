@@ -4,7 +4,7 @@ import { supabase } from "@/lib/supabase";
 import { colors } from "@/styles/colors";
 import { exercise, logger, main } from "@/styles/style";
 import * as Crypto from "expo-crypto";
-import { router, useRouter } from "expo-router";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -123,17 +123,21 @@ export default function AddWorkoutPlan() {
 
     setIsSaving(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (!session) throw new Error("No session found");
 
       // 1. Save Plan
       const { data: plan, error: planError } = await supabase
         .from("workout_plans")
-        .insert([{ 
-          user_id: session.user.id, 
-          name: planName, 
-          description: `${exercises.length} Exercises` 
-        }])
+        .insert([
+          {
+            user_id: session.user.id,
+            name: planName,
+            description: `${exercises.length} Exercises`,
+          },
+        ])
         .select()
         .single();
 
@@ -147,7 +151,7 @@ export default function AddWorkoutPlan() {
         target_sets: ex.sets.length,
         target_reps: parseInt(ex.sets[0]?.reps || "0"),
         target_weight: parseFloat(ex.sets[0]?.weight || "0"),
-        order_index: index
+        order_index: index,
       }));
 
       const { error: exercisesError } = await supabase
@@ -171,7 +175,7 @@ export default function AddWorkoutPlan() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={main.container}
     >
-      <View style={{ paddingHorizontal: 20, paddingTop: 10 }}>
+      <View>
         <BackButton color={colors.blue} />
 
         <Text style={[logger.sectionTitle, { marginBottom: 5, marginTop: 10 }]}>
@@ -226,7 +230,11 @@ export default function AddWorkoutPlan() {
 
       <View style={exercise.fixedFooter}>
         <TouchableOpacity
-          style={[logger.submitBtn, { backgroundColor: colors.blue }, isSaving && { opacity: 0.7 }]}
+          style={[
+            logger.submitBtn,
+            { backgroundColor: colors.blue },
+            isSaving && { opacity: 0.7 },
+          ]}
           onPress={handleSavePlan}
           disabled={isSaving}
         >

@@ -106,6 +106,10 @@ function RootLayoutNav() {
         name="screens/tracking/add-workout-plan"
         options={{ title: "Add Workout Plan", headerShown: false }}
       />
+      <Stack.Screen
+        name="screens/tracking/edit-workout-plan"
+        options={{ title: "Edit Workout Plan", headerShown: false }}
+      />
     </Stack>
   );
 }
