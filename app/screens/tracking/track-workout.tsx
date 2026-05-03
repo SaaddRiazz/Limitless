@@ -34,42 +34,75 @@ interface Exercise {
 
 export default function TrackWorkout() {
   const router = useRouter();
-  const { planId, planName } = useLocalSearchParams<{ planId: string; planName: string }>();
+  const { planId, planName } = useLocalSearchParams<{
+    planId: string;
+    planName: string;
+  }>();
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
   const [isFinishing, setIsFinishing] = useState(false);
   const [startTime] = useState(new Date());
 
+  const [historySets, setHistorySets] = useState<any[]>([]);
+
   useEffect(() => {
     if (planId) {
-      fetchPlanExercises();
+      initWorkout();
     } else {
       setLoading(false);
     }
   }, [planId]);
 
-  const fetchPlanExercises = async () => {
+  const initWorkout = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const { data, error } = await supabase
+      const { data: planExData, error: planExError } = await supabase
         .from("plan_exercises")
         .select("*")
         .eq("plan_id", planId)
         .order("order_index", { ascending: true });
 
-      if (error) throw error;
+      if (planExError) throw planExError;
 
-      // Map rows to the UI structure. Each row has 'target_sets' count.
-      const formattedExercises = data.map((item: any) => {
+      const { data: lastLog } = await supabase
+        .from("workout_logs")
+        .select("id")
+        .eq("plan_id", planId)
+        .order("completed_at", { ascending: false })
+        .limit(1)
+        .single();
+
+      let prevSets: any[] = [];
+      if (lastLog) {
+        const { data: lastSets } = await supabase
+          .from("exercise_sets")
+          .select("exercise_name, weight, set_number")
+          .eq("workout_log_id", lastLog.id);
+
+        prevSets = lastSets || [];
+        setHistorySets(prevSets);
+      }
+
+      const formattedExercises = planExData.map((item: any) => {
         const setsCount = parseInt(item.target_sets) || 1;
-        const sets = Array.from({ length: setsCount }).map((_, i) => ({
-          id: Crypto.randomUUID(),
-          weight: item.target_weight?.toString() || "",
-          reps: item.target_reps?.toString() || "",
-          checked: false,
-          isUnlocked: i === 0,
-          prevWeight: "Target",
-        }));
+        const sets = Array.from({ length: setsCount }).map((_, i) => {
+          const matchingPrevSet = prevSets.find(
+            (ps) =>
+              ps.exercise_name === item.exercise_name &&
+              ps.set_number === i + 1,
+          );
+
+          return {
+            id: Crypto.randomUUID(),
+            weight: item.target_weight?.toString() || "",
+            reps: item.target_reps?.toString() || "",
+            checked: false,
+            isUnlocked: i === 0,
+            prevWeight: matchingPrevSet
+              ? matchingPrevSet.weight.toString()
+              : "–",
+          };
+        });
 
         return {
           id: Crypto.randomUUID(),
@@ -80,8 +113,8 @@ export default function TrackWorkout() {
 
       setExercises(formattedExercises);
     } catch (error: any) {
-      console.error("Fetch Error:", error.message);
-      Alert.alert("Error", "Failed to load plan exercises.");
+      console.error("Init Error:", error.message);
+      Alert.alert("Error", "Failed to load workout details.");
     } finally {
       setLoading(false);
     }
@@ -92,28 +125,32 @@ export default function TrackWorkout() {
 
     setIsFinishing(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (!session) throw new Error("No session found");
 
       const endTime = new Date();
-      const durationMinutes = Math.round((endTime.getTime() - startTime.getTime()) / 60000);
+      const durationMinutes = Math.round(
+        (endTime.getTime() - startTime.getTime()) / 60000,
+      );
 
-      // 1. Create Workout Log (schema: user_id, plan_id, workout_name, duration_minutes, completed_at)
       const { data: log, error: logError } = await supabase
         .from("workout_logs")
-        .insert([{
-          user_id: session.user.id,
-          plan_id: planId || null,
-          workout_name: planName || "Untitled Workout",
-          duration_minutes: durationMinutes,
-          completed_at: endTime.toISOString()
-        }])
+        .insert([
+          {
+            user_id: session.user.id,
+            plan_id: planId || null,
+            workout_name: planName || "Untitled Workout",
+            duration_minutes: durationMinutes,
+            completed_at: endTime.toISOString(),
+          },
+        ])
         .select()
         .single();
 
       if (logError) throw logError;
 
-      // 2. Save Sets (schema: workout_log_id, user_id, exercise_name, weight, reps, set_number, is_completed)
       const setsToInsert = exercises.flatMap((ex) =>
         ex.sets.map((set, index) => ({
           workout_log_id: log.id,
@@ -122,8 +159,8 @@ export default function TrackWorkout() {
           weight: parseFloat(set.weight || "0"),
           reps: parseInt(set.reps || "0"),
           set_number: index + 1,
-          is_completed: true
-        }))
+          is_completed: true,
+        })),
       );
 
       const { error: setsError } = await supabase
@@ -143,9 +180,9 @@ export default function TrackWorkout() {
     }
   };
 
-  const isWorkoutComplete = exercises.length > 0 && exercises.every((ex) =>
-    ex.sets.every((s) => s.checked),
-  );
+  const isWorkoutComplete =
+    exercises.length > 0 &&
+    exercises.every((ex) => ex.sets.every((s) => s.checked));
 
   const addExercise = () => {
     setExercises([
@@ -160,7 +197,7 @@ export default function TrackWorkout() {
             reps: "",
             checked: false,
             isUnlocked: true,
-            prevWeight: "—",
+            prevWeight: "–",
           },
         ],
       },
@@ -176,7 +213,13 @@ export default function TrackWorkout() {
       prev.map((item) => {
         if (item.id === exId) {
           const lastSet = item.sets[item.sets.length - 1];
+          const newSetNumber = item.sets.length + 1;
           const shouldBeUnlocked = lastSet ? lastSet.checked : true;
+
+          const matchingPrevSet = historySets.find(
+            (ps) =>
+              ps.exercise_name === item.name && ps.set_number === newSetNumber,
+          );
 
           return {
             ...item,
@@ -184,11 +227,13 @@ export default function TrackWorkout() {
               ...item.sets,
               {
                 id: Crypto.randomUUID(),
-                weight: lastSet ? lastSet.weight : "—",
-                reps: lastSet ? lastSet.reps : "—",
+                weight: lastSet ? lastSet.weight : "",
+                reps: lastSet ? lastSet.reps : "",
                 checked: false,
                 isUnlocked: shouldBeUnlocked,
-                prevWeight: lastSet?.prevWeight || "—",
+                prevWeight: matchingPrevSet
+                  ? matchingPrevSet.weight.toString()
+                  : "–",
               },
             ],
           };
@@ -249,7 +294,11 @@ export default function TrackWorkout() {
         showsVerticalScrollIndicator={false}
       >
         {loading ? (
-          <ActivityIndicator size="large" color={colors.blue} style={{ marginTop: 50 }} />
+          <ActivityIndicator
+            size="large"
+            color={colors.blue}
+            style={{ marginTop: 50 }}
+          />
         ) : (
           <>
             {exercises.map((ex, exIdx) => (
@@ -265,13 +314,18 @@ export default function TrackWorkout() {
                   );
                 }}
                 onDeleteExercise={() => deleteExercise(ex.id)}
-                onUpdateSet={(setId, updates) => updateSet(ex.id, setId, updates)}
+                onUpdateSet={(setId, updates) =>
+                  updateSet(ex.id, setId, updates)
+                }
                 onAddSet={() => addSet(ex.id)}
                 onDeleteSet={(setId) => deleteSet(ex.id, setId)}
               />
             ))}
 
-            <TouchableOpacity style={exercise.addExerciseBtn} onPress={addExercise}>
+            <TouchableOpacity
+              style={exercise.addExerciseBtn}
+              onPress={addExercise}
+            >
               <Text style={exercise.addExerciseText}>+ ADD EXERCISE</Text>
             </TouchableOpacity>
           </>
@@ -285,7 +339,7 @@ export default function TrackWorkout() {
             {
               backgroundColor: isWorkoutComplete ? colors.blue : colors.divider,
             },
-            isFinishing && { opacity: 0.7 }
+            isFinishing && { opacity: 0.7 },
           ]}
           disabled={!isWorkoutComplete || isFinishing}
           onPress={finishWorkout}

@@ -19,8 +19,9 @@ import {
 import { BackButton } from "../../../components/ui/back-button";
 import { auth, logger, main } from "../../../styles/style";
 
-// Initialize Gemini
-const genAI = new GoogleGenerativeAI(process.env.EXPO_PUBLIC_GEMINI_API_KEY || "");
+const genAI = new GoogleGenerativeAI(
+  process.env.EXPO_PUBLIC_GEMINI_API_KEY || "",
+);
 
 export default function NutritionLog() {
   const router = useRouter();
@@ -28,7 +29,6 @@ export default function NutritionLog() {
   const [historyData, setHistoryData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Form State
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedMealType, setSelectedMealType] = useState("");
   const [foodName, setFoodName] = useState("");
@@ -51,18 +51,19 @@ export default function NutritionLog() {
   const fetchHistory = async () => {
     try {
       setLoading(true);
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (!session) return;
 
       const { data, error } = await supabase
         .from("nutrition_logs")
         .select("*")
         .eq("user_id", session.user.id)
-        .order("logged_at", { ascending: false });
+        .order("logged_at", { ascending: true });
 
       if (error) throw error;
 
-      // Group by date
       const grouped = data.reduce((acc: any, log: any) => {
         const date = new Date(log.logged_at).toLocaleDateString("en-US", {
           month: "short",
@@ -73,17 +74,32 @@ export default function NutritionLog() {
         if (!acc[date]) {
           acc[date] = {
             date,
-            color: date === new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) ? colors.green : colors.blue,
+            color:
+              date ===
+              new Date().toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })
+                ? colors.green
+                : colors.blue,
             meals: {},
           };
         }
 
         if (!acc[date].meals[log.meal_type]) {
-          acc[date].meals[log.meal_type] = { type: log.meal_type, calories: 0, count: 0 };
+          acc[date].meals[log.meal_type] = {
+            type: log.meal_type,
+            calories: 0,
+            items: [],
+          };
         }
 
         acc[date].meals[log.meal_type].calories += log.calories;
-        acc[date].meals[log.meal_type].count += 1;
+        acc[date].meals[log.meal_type].items.push({
+          name: log.food_name,
+          cal: log.calories,
+        });
 
         return acc;
       }, {});
@@ -92,7 +108,7 @@ export default function NutritionLog() {
         ...day,
         meals: Object.values(day.meals).map((m: any) => ({
           ...m,
-          label: `${m.count} ${m.count === 1 ? "entry" : "entries"}`,
+          itemsList: m.items,
         })),
       }));
 
@@ -112,7 +128,9 @@ export default function NutritionLog() {
 
     setIsEstimating(true);
     try {
-      const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
+      const model = genAI.getGenerativeModel({
+        model: "gemini-3.1-flash-lite-preview",
+      });
       const prompt = `Estimate the calories for: ${foodName} - ${description}. Return ONLY the integer number. If you cannot estimate, return 0.`;
       const result = await model.generateContent(prompt);
       const response = await result.response;
@@ -121,7 +139,10 @@ export default function NutritionLog() {
       setCalories(calorieValue.toString());
     } catch (error) {
       console.error("Gemini Error:", error);
-      Alert.alert("AI Error", "Failed to estimate calories. Please enter manually.");
+      Alert.alert(
+        "AI Error",
+        "Failed to estimate calories. Please enter manually.",
+      );
     } finally {
       setIsEstimating(false);
     }
@@ -135,7 +156,9 @@ export default function NutritionLog() {
 
     setIsSaving(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (!session) throw new Error("No session found");
 
       const { error } = await supabase.from("nutrition_logs").insert([
@@ -220,7 +243,11 @@ export default function NutritionLog() {
         </Text>
 
         {loading ? (
-          <ActivityIndicator size="large" color={colors.green} style={{ marginTop: 20 }} />
+          <ActivityIndicator
+            size="large"
+            color={colors.green}
+            style={{ marginTop: 20 }}
+          />
         ) : historyData.length > 0 ? (
           historyData.map((day, index) => (
             <NutritionHistoryCard
@@ -228,17 +255,21 @@ export default function NutritionLog() {
               date={day.date}
               meals={day.meals as any}
               color={day.color}
-              onPress={() => console.log("Viewing Day Detail")}
             />
           ))
         ) : (
-          <Text style={{ color: colors.textMuted, textAlign: "center", marginTop: 20 }}>
+          <Text
+            style={{
+              color: colors.textMuted,
+              textAlign: "center",
+              marginTop: 20,
+            }}
+          >
             No nutrition logs found. Start tracking today!
           </Text>
         )}
       </ScrollView>
 
-      {/* Track Calories Modal */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -291,7 +322,11 @@ export default function NutritionLog() {
                   {isEstimating ? (
                     <ActivityIndicator size="small" color="#fff" />
                   ) : (
-                    <MaterialCommunityIcons name="robot" size={24} color="#fff" />
+                    <MaterialCommunityIcons
+                      name="robot"
+                      size={24}
+                      color="#fff"
+                    />
                   )}
                 </TouchableOpacity>
               </View>

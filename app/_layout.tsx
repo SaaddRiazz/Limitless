@@ -99,10 +99,6 @@ function RootLayoutNav() {
         options={{ title: "Track Workout", headerShown: false }}
       />
       <Stack.Screen
-        name="screens/tracking/track-calories"
-        options={{ title: "Track Calories", headerShown: false }}
-      />
-      <Stack.Screen
         name="screens/tracking/add-workout-plan"
         options={{ title: "Add Workout Plan", headerShown: false }}
       />
