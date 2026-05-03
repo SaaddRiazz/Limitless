@@ -1,5 +1,6 @@
 import { NutritionHistoryCard } from "@/components/ui/nutrition-history-card";
 import { supabase } from "@/lib/supabase";
+import { addXP, XP_VALUES } from "@/lib/xp-service";
 import { colors } from "@/styles/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { GoogleGenerativeAI } from "@google/generative-ai";
@@ -174,6 +175,7 @@ export default function NutritionLog() {
 
       if (error) throw error;
 
+      await addXP(XP_VALUES.MEAL_LOG);
       setModalVisible(false);
       resetForm();
       fetchHistory();

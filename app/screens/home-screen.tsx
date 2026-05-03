@@ -1,7 +1,8 @@
-import { supabase } from "@/lib/supabase";
+import { useFocusEffect } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { supabase } from "@/lib/supabase";
 import { router } from "expo-router";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Animated,
@@ -21,6 +22,10 @@ export default function HomeScreen({ navigation }: any) {
     xp: 0,
     level: 1,
     streak: 0,
+    water: 0,
+    calories: 0,
+    workouts: 0,
+    weight: "—",
   });
   const [loading, setLoading] = useState(true);
 
@@ -32,9 +37,11 @@ export default function HomeScreen({ navigation }: any) {
 
   const animatedWidth = useRef(new Animated.Value(0)).current;
 
-  useEffect(() => {
-    fetchProfile();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchProfile();
+    }, []),
+  );
 
   useEffect(() => {
     if (!loading) {
@@ -57,22 +64,62 @@ export default function HomeScreen({ navigation }: any) {
 
       if (!user) return;
 
-      const { data, error } = await supabase
+      // 1. Fetch Profile Info
+      const { data: profileData } = await supabase
         .from("profiles")
         .select("username, xp, level, streak")
         .eq("id", user.id)
         .single();
 
-      if (error) {
-        console.error("Error fetching home profile:", error.message);
-      } else if (data) {
-        setProfile({
-          username: data.username || "CHAMPION",
-          xp: data.xp || 0,
-          level: data.level || 1,
-          streak: data.streak || 0,
-        });
-      }
+      // 2. Fetch Today's Data
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayStr = today.toISOString();
+
+      // Water
+      const { data: waterData } = await supabase
+        .from("water_logs")
+        .select("amount_ml")
+        .eq("user_id", user.id)
+        .gte("created_at", todayStr);
+
+      const totalWater = waterData?.reduce((sum, item) => sum + item.amount_ml, 0) || 0;
+
+      // Calories
+      const { data: nutritionData } = await supabase
+        .from("nutrition_logs")
+        .select("calories")
+        .eq("user_id", user.id)
+        .gte("logged_at", todayStr);
+
+      const totalCalories = nutritionData?.reduce((sum, item) => sum + item.calories, 0) || 0;
+
+      // Workouts
+      const { count: workoutCount } = await supabase
+        .from("workout_logs")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .gte("completed_at", todayStr);
+
+      // Weight (Latest)
+      const { data: weightData } = await supabase
+        .from("biometrics")
+        .select("weight_kg")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
+
+      setProfile({
+        username: profileData?.username || "CHAMPION",
+        xp: profileData?.xp || 0,
+        level: profileData?.level || 1,
+        streak: profileData?.streak || 0,
+        water: totalWater,
+        calories: totalCalories,
+        workouts: workoutCount || 0,
+        weight: weightData ? `${weightData.weight_kg}kg` : "—",
+      });
     } catch (error) {
       console.error("Unexpected error fetching profile:", error);
     } finally {
@@ -104,7 +151,7 @@ export default function HomeScreen({ navigation }: any) {
         <TouchableOpacity
           activeOpacity={0.8}
           style={main.levelContainer}
-          onPress={() => navigation.navigate("Profile")}
+          onPress={() => router.push("/screens/profile-screen")}
         >
           <View
             style={{ flexDirection: "row", justifyContent: "space-between" }}
@@ -151,31 +198,31 @@ export default function HomeScreen({ navigation }: any) {
               hexColor={colors.orange}
             />
             <DashboardCard
-              title="Steps"
-              icon="run"
-              value="8,432"
-              onPress={() => {}}
+              title="Workouts"
+              icon="arm-flex"
+              value={profile.workouts.toString()}
+              onPress={() => router.push("/screens/logger/workout-log")}
               hexColor={colors.red}
             />
             <DashboardCard
-              title="Sleep"
-              icon="weather-night"
-              value="7h 20m"
-              onPress={() => {}}
+              title="Weight"
+              icon="scale-bathroom"
+              value={profile.weight}
+              onPress={() => router.push("/screens/logger/weight-log")}
               hexColor={colors.yellow}
             />
             <DashboardCard
               title="Calories"
               icon="food-apple"
-              value="1,450"
-              onPress={() => {}}
+              value={profile.calories.toString()}
+              onPress={() => router.push("/screens/logger/nutrition-log")}
               hexColor={colors.green}
             />
             <DashboardCard
               title="Water"
               icon="water"
-              value="1.5L"
-              onPress={() => {}}
+              value={`${profile.water}ml`}
+              onPress={() => router.push("/screens/logger/water-log")}
               hexColor={colors.cyan}
             />
           </ScrollView>

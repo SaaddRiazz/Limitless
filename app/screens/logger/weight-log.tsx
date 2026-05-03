@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { LineChart } from "react-native-chart-kit";
 import { supabase } from "@/lib/supabase";
+import { addXP, XP_VALUES } from "@/lib/xp-service";
 import { colors } from "../../../styles/colors";
 import { logger, main } from "../../../styles/style";
 
@@ -112,6 +113,7 @@ export default function WeightLog() {
 
       if (error) throw error;
 
+      await addXP(XP_VALUES.WEIGHT_LOG);
       fetchInitialData();
     } catch (error) {
       console.error("Error updating biometrics:", error);
