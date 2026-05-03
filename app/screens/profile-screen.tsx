@@ -1,8 +1,9 @@
+import { useFocusEffect } from "@react-navigation/native";
 import { supabase } from "@/lib/supabase";
 import { decode } from "base64-arraybuffer";
 import * as FileSystem from "expo-file-system/legacy";
 import * as ImagePicker from "expo-image-picker";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -33,9 +34,11 @@ export default function ProfileScreen() {
   const progressPercent = Math.min(Math.max((xp / nextLevelXP) * 100, 0), 100);
   const animatedWidth = useRef(new Animated.Value(0)).current;
 
-  useEffect(() => {
-    getProfile();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      getProfile();
+    }, []),
+  );
 
   useEffect(() => {
     if (!loading) {
