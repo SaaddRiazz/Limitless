@@ -27,85 +27,39 @@ function RootLayoutNav() {
     if (isLoading) return;
 
     const inAuthGroup = segments[0] === "sign-in" || segments[0] === "sign-up";
+    const isSplash = segments[0] === "splash";
+
+    if (isSplash) return;
 
     if (!session && !inAuthGroup) {
-      // Redirect to sign-in if not logged in
       router.replace("/sign-in");
-    } else if (session && (inAuthGroup || !segments[0])) {
-      // Redirect to main app if logged in and at root or auth screens
+    } else if (session && inAuthGroup) {
       router.replace("/App");
     }
   }, [session, isLoading, segments]);
 
   return (
-    <Stack>
-      <Stack.Screen name="index" options={{ headerShown: false }} />
-      <Stack.Screen
-        name="sign-in"
-        options={{ title: "Log In", headerShown: false }}
-      />
-      <Stack.Screen
-        name="sign-up"
-        options={{ title: "Sign Up", headerShown: false }}
-      />
-      <Stack.Screen
-        name="App"
-        options={{ title: "Main", headerShown: false }}
-      />
-      <Stack.Screen
-        name="screens/home-screen"
-        options={{ title: "Home", headerShown: false }}
-      />
-      <Stack.Screen
-        name="screens/workout-screen"
-        options={{ title: "Workout", headerShown: false }}
-      />
-      <Stack.Screen
-        name="screens/logger-screen"
-        options={{ title: "Logger", headerShown: false }}
-      />
-      <Stack.Screen
-        name="screens/chat-screen"
-        options={{ title: "AI Trainer", headerShown: false }}
-      />
-      <Stack.Screen
-        name="screens/profile-screen"
-        options={{ title: "Profile", headerShown: false }}
-      />
+    <Stack screenOptions={{ headerShown: false }} initialRouteName="splash">
+      <Stack.Screen name="splash" />
+      <Stack.Screen name="index" />
+      <Stack.Screen name="sign-in" options={{ title: "Log In" }} />
+      <Stack.Screen name="sign-up" options={{ title: "Sign Up" }} />
+      <Stack.Screen name="App" options={{ title: "Main" }} />
 
-      <Stack.Screen
-        name="screens/logger/workout-log"
-        options={{ title: "Workout Log", headerShown: false }}
-      />
-      <Stack.Screen
-        name="screens/logger/nutrition-log"
-        options={{ title: "Nutrition Log", headerShown: false }}
-      />
-      <Stack.Screen
-        name="screens/logger/weight-log"
-        options={{ title: "Weight Log", headerShown: false }}
-      />
-      <Stack.Screen
-        name="screens/logger/water-log"
-        options={{ title: "Water Log", headerShown: false }}
-      />
-      <Stack.Screen
-        name="screens/logger/photos-log"
-        options={{ title: "Photos Log", headerShown: false }}
-      />
+      <Stack.Screen name="screens/home-screen" />
+      <Stack.Screen name="screens/workout-screen" />
+      <Stack.Screen name="screens/logger-screen" />
+      <Stack.Screen name="screens/chat-screen" />
+      <Stack.Screen name="screens/profile-screen" />
+      <Stack.Screen name="screens/logger/workout-log" />
+      <Stack.Screen name="screens/logger/nutrition-log" />
+      <Stack.Screen name="screens/logger/weight-log" />
+      <Stack.Screen name="screens/logger/water-log" />
+      <Stack.Screen name="screens/logger/photos-log" />
 
-      <Stack.Screen
-        name="screens/tracking/track-workout"
-        options={{ title: "Track Workout", headerShown: false }}
-      />
-      <Stack.Screen
-        name="screens/tracking/add-workout-plan"
-        options={{ title: "Add Workout Plan", headerShown: false }}
-      />
-      <Stack.Screen
-        name="screens/tracking/edit-workout-plan"
-        options={{ title: "Edit Workout Plan", headerShown: false }}
-      />
+      <Stack.Screen name="screens/tracking/track-workout" />
+      <Stack.Screen name="screens/tracking/add-workout-plan" />
+      <Stack.Screen name="screens/tracking/edit-workout-plan" />
     </Stack>
   );
 }
@@ -116,7 +70,7 @@ export default function RootLayout() {
       <AuthProvider>
         <ThemeProvider value={LimitlessTheme}>
           <RootLayoutNav />
-          <StatusBar style="auto" />
+          <StatusBar style="light" />
         </ThemeProvider>
       </AuthProvider>
     </View>
