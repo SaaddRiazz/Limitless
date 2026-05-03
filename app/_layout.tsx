@@ -97,6 +97,15 @@ function RootLayoutNav() {
         name="screens/logger/photos-log"
         options={{ title: "Photos Log", headerShown: false }}
       />
+
+      <Stack.Screen
+        name="screens/tracking/track-workout"
+        options={{ title: "Track Workout", headerShown: false }}
+      />
+      <Stack.Screen
+        name="screens/tracking/add-workout-plan"
+        options={{ title: "Add Workout Plan", headerShown: false }}
+      />
     </Stack>
   );
 }

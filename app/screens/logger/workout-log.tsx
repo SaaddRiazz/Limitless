@@ -50,7 +50,9 @@ export default function WorkoutLog() {
               <TouchableOpacity
                 key={plan.id}
                 style={styles.dropdownItem}
-                onPress={() => {}}
+                onPress={() => {
+                  router.push("/screens/tracking/track-workout");
+                }}
               >
                 <Text style={{ color: "#fff" }}>{plan.name}</Text>
                 <MaterialCommunityIcons

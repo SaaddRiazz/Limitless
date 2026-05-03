@@ -1,4 +1,5 @@
 import { StyleSheet } from "react-native";
+import { colors } from "./colors";
 
 export const auth = StyleSheet.create({
   innerContainer: {
@@ -266,5 +267,123 @@ export const logger = StyleSheet.create({
     fontWeight: "900",
     fontSize: 16,
     letterSpacing: 1,
+  },
+});
+
+export const exercise = StyleSheet.create({
+  exerciseCard: {
+    backgroundColor: `${colors.blue}15`,
+    borderRadius: 16,
+    padding: 15,
+    marginBottom: 25,
+    borderWidth: 1,
+    borderColor: colors.blue,
+  },
+  cardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  exerciseTitle: {
+    color: colors.blue,
+    fontSize: 10,
+    fontWeight: "900",
+    letterSpacing: 2,
+  },
+  exerciseInput: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "bold",
+    marginVertical: 10,
+  },
+  setRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 6,
+    gap: 8,
+  },
+  interactiveRow: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  headerText: {
+    color: colors.textMuted,
+    fontSize: 10,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  setNumber: {
+    color: "#fff",
+    width: 30,
+    textAlign: "center",
+    fontWeight: "bold",
+  },
+  input: {
+    flex: 1,
+    backgroundColor: colors.black,
+    color: "#fff",
+    textAlign: "center",
+    paddingVertical: 6,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.cardBorder,
+  },
+  prevContainer: {
+    flex: 1,
+    alignItems: "center",
+  },
+  prevText: {
+    color: colors.textDark,
+    fontWeight: "600",
+  },
+  checkBtn: {
+    width: 30,
+    alignItems: "center",
+  },
+  addSetBtn: {
+    marginTop: 15,
+    paddingVertical: 5,
+  },
+  addSetText: {
+    color: colors.blue,
+    fontWeight: "bold",
+    fontSize: 12,
+  },
+  fixedHeader: {
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 10,
+  },
+  scrollContent: {
+    paddingTop: 20,
+    paddingBottom: 120,
+  },
+  addExerciseBtn: {
+    borderWidth: 1,
+    borderColor: colors.blue,
+    borderStyle: "dashed",
+    padding: 18,
+    borderRadius: 12,
+    alignItems: "center",
+    backgroundColor: "rgba(33, 150, 243, 0.05)",
+    marginBottom: 40,
+  },
+  addExerciseText: {
+    color: colors.blue,
+    fontWeight: "900",
+    letterSpacing: 1,
+  },
+  fixedFooter: {
+    position: "absolute",
+    backgroundColor: colors.background,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 20,
+    paddingBottom: 0,
+    borderTopWidth: 1,
+    borderTopColor: colors.cardBorder,
   },
 });
