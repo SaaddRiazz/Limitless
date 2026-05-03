@@ -14,6 +14,7 @@ export const colors = {
   deepSpace: "#050505", // Tab/Header BG
   surface: "#0a0a0a", // Card BG
   elevated: "#121212", // Dropdowns / Modals
+  background: "#00000a",
 
   // --- Borders & Lines ---
   cardBorder: "#1a1a1a", // Subtle borders

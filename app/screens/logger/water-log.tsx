@@ -1,3 +1,4 @@
+import { supabase } from "@/lib/supabase";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import {
@@ -8,7 +9,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { supabase } from "@/lib/supabase";
 import { BackButton } from "../../../components/ui/back-button";
 import { HistoryCard } from "../../../components/ui/history-card";
 import { colors } from "../../../styles/colors";
@@ -26,7 +26,9 @@ export default function WaterLog() {
 
   const fetchInitialData = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (!session) return;
 
       const user_id = session.user.id;
@@ -41,7 +43,8 @@ export default function WaterLog() {
 
       if (today_error) throw today_error;
 
-      const total_today = today_data?.reduce((sum, item) => sum + item.amount_ml, 0) || 0;
+      const total_today =
+        today_data?.reduce((sum, item) => sum + item.amount_ml, 0) || 0;
       setMl(total_today);
       setSavedMl(total_today);
 
@@ -90,18 +93,18 @@ export default function WaterLog() {
   const handleSave = async () => {
     setLoading(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (!session) return;
 
       const amount_to_add = ml - savedMl;
       if (amount_to_add === 0) return;
 
-      const { error } = await supabase
-        .from("water_logs")
-        .insert({
-          user_id: session.user.id,
-          amount_ml: amount_to_add,
-        });
+      const { error } = await supabase.from("water_logs").insert({
+        user_id: session.user.id,
+        amount_ml: amount_to_add,
+      });
 
       if (error) throw error;
 

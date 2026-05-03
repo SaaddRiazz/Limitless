@@ -1,4 +1,4 @@
-import { HistoryCard } from "@/components/ui/history-card";
+import { NutritionHistoryCard } from "@/components/ui/nutrition-history-card";
 import { colors } from "@/styles/colors";
 import MaterialCommunityIcons from "@expo/vector-icons/build/MaterialCommunityIcons";
 import { useRouter } from "expo-router";
@@ -17,23 +17,49 @@ export default function NutritionLog() {
   const router = useRouter();
   const [showDropdown, setShowDropdown] = useState(false);
 
-  const workoutPlans = [
+  const mealTypes = [
     { id: 1, name: "Breakfast" },
     { id: 2, name: "Lunch" },
     { id: 3, name: "Dinner" },
     { id: 4, name: "Snacks" },
   ];
 
+  const historyData = [
+    {
+      date: "Oct 26, 2025",
+      color: colors.blue,
+      meals: [
+        { type: "Breakfast", calories: 450, label: "3 entries" },
+        { type: "Lunch", calories: 650, label: "2 entries" },
+        { type: "Dinner", calories: 800, label: "3 entries" },
+      ],
+    },
+    {
+      date: "Oct 25, 2025",
+      color: colors.green,
+      meals: [
+        { type: "Breakfast", calories: 300, label: "2 entries" },
+        { type: "Snacks", calories: 200, label: "1 entries" },
+        { type: "Dinner", calories: 1200, label: "7 entries" },
+      ],
+    },
+    {
+      date: "Oct 24, 2025",
+      color: colors.yellow,
+      meals: [
+        { type: "Breakfast", calories: 450, label: "5 entries" },
+        { type: "Lunch", calories: 650, label: "2 entries" },
+        { type: "Dinner", calories: 800, label: "2 entries" },
+      ],
+    },
+  ];
+
   return (
     <View style={main.container}>
       <BackButton color={colors.green} />
-      <Text style={logger.sectionTitle}>Nutrition Log</Text>
-      <View
-        style={{
-          zIndex: 1000,
-          position: "relative",
-        }}
-      >
+
+      <View style={{ zIndex: 2000 }}>
+        <Text style={logger.sectionTitle}>Nutrition Log</Text>
         <TouchableOpacity
           style={[
             auth.filledBtn,
@@ -43,15 +69,21 @@ export default function NutritionLog() {
         >
           <Text style={auth.filledBtnText}>Track Calories</Text>
         </TouchableOpacity>
+
         {showDropdown && (
           <View style={styles.dropdown}>
-            {workoutPlans.map((plan) => (
+            {mealTypes.map((meal) => (
               <TouchableOpacity
-                key={plan.id}
+                key={meal.id}
                 style={styles.dropdownItem}
-                onPress={() => {}}
+                onPress={() => {
+                  setShowDropdown(false);
+                  router.push("/screens/tracking/track-calories");
+                }}
               >
-                <Text style={{ color: "#fff" }}>{plan.name}</Text>
+                <Text style={{ color: "#fff", fontWeight: "600" }}>
+                  {meal.name}
+                </Text>
                 <MaterialCommunityIcons
                   name="chevron-right"
                   size={20}
@@ -63,45 +95,23 @@ export default function NutritionLog() {
         )}
       </View>
 
-      <ScrollView contentContainerStyle={{ paddingBottom: 30 }}>
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 30 }}
+        showsVerticalScrollIndicator={false}
+      >
         <Text style={[logger.sectionTitle, { marginTop: 40 }]}>
           Recent History
         </Text>
-        <HistoryCard
-          date="Oct 24, 2025"
-          title="Dinner"
-          subtitle="1780kcal • 2 Entries"
-          color={colors.blue}
-          onPress={() => console.log("View Details")}
-        />
-        <HistoryCard
-          date="Oct 24, 2025"
-          title="Snacks"
-          subtitle="1780kcal • 2 Entries"
-          color={colors.green}
-          onPress={() => console.log("View Details")}
-        />
-        <HistoryCard
-          date="Oct 24, 2025"
-          title="Lunch"
-          subtitle="1780kcal • 2 Entries"
-          color={colors.yellow}
-          onPress={() => console.log("View Details")}
-        />
-        <HistoryCard
-          date="Oct 24, 2025"
-          title="Breakfast"
-          subtitle="1780kcal • 2 Entries"
-          color={colors.orange}
-          onPress={() => console.log("View Details")}
-        />
-        <HistoryCard
-          date="Oct 24, 2025"
-          title="Dinner"
-          subtitle="1780kcal • 2 Entries"
-          color={colors.red}
-          onPress={() => console.log("View Details")}
-        />
+
+        {historyData.map((day, index) => (
+          <NutritionHistoryCard
+            key={index}
+            date={day.date}
+            meals={day.meals as any}
+            color={day.color}
+            onPress={() => console.log("Viewing Day Detail")}
+          />
+        ))}
       </ScrollView>
     </View>
   );
@@ -115,7 +125,7 @@ const styles = StyleSheet.create({
     borderColor: "#222",
     overflow: "hidden",
     position: "absolute",
-    top: 55,
+    top: 85,
     width: "100%",
     zIndex: 2000,
     shadowColor: "#000",
@@ -130,10 +140,5 @@ const styles = StyleSheet.create({
     borderBottomColor: "#222",
     flexDirection: "row",
     justifyContent: "space-between",
-  },
-  historyCard: {
-    backgroundColor: "#111",
-    padding: 15,
-    borderRadius: 12,
   },
 });
