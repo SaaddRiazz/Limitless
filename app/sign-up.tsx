@@ -10,40 +10,66 @@ export default function SignUp() {
   const router = useRouter();
 
   const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [otp, setOtp] = useState("");
+  // const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showOtp, setShowOtp] = useState(false);
+  // const [showOtp, setShowOtp] = useState(false);
 
+  const usernameRef = useRef<TextInput>(null);
   const passwordRef = useRef<TextInput>(null);
   const confirmPasswordRef = useRef<TextInput>(null);
 
   const signUpWithEmail = async () => {
+    if (!username.trim()) {
+      Alert.alert("Error", "Please enter a username");
+      return;
+    }
     if (password !== confirmPassword) {
       Alert.alert("Error", "Passwords do not match");
       return;
     }
 
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
-      email: email,
-      password: password,
-    });
+    try {
+      const { data: { user }, error } = await supabase.auth.signUp({
+        email: email,
+        password: password,
+      });
 
-    if (error) {
-      Alert.alert("Error", error.message);
-    } else {
-      // Move to OTP verification step
-      setShowOtp(true);
-      Alert.alert(
-        "Verify Email",
-        "A 6-digit code has been sent to your email.",
-      );
+      if (error) {
+        Alert.alert("Error", error.message);
+      } else if (user) {
+        // Set username in profiles table
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .upsert({
+            id: user.id,
+            username: username.trim(),
+            xp: 0,
+            level: 1,
+            streak: 0
+          });
+        
+        if (profileError) {
+          console.error("Profile creation error:", profileError.message);
+        }
+
+        Alert.alert(
+          "Success",
+          "Account created successfully!",
+          [{ text: "OK", onPress: () => router.replace("/App") }]
+        );
+      }
+    } catch (err: any) {
+      Alert.alert("Error", err.message);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
+  /*
   const verifyOtp = async () => {
     if (otp.length !== 6) {
       Alert.alert("Error", "Please enter a valid 6-digit code");
@@ -60,99 +86,91 @@ export default function SignUp() {
     if (error) {
       Alert.alert("Verification Failed", error.message);
     } else {
-      // If verification is successful, your AuthProvider will detect the session
-      // and redirect automatically, but we can force it here just in case.
       router.replace("/App");
     }
     setLoading(false);
   };
+  */
 
   return (
     <View style={auth.innerContainer}>
       <Text style={auth.logo}>LIMITLESS</Text>
       <Text style={auth.welcomeText}>
-        {showOtp ? (
-          "Enter the code sent to your email."
-        ) : (
-          <>
-            Never <Text style={{ color: "#fff" }}>Done. </Text>
-            Only <Text style={{ color: "#fff" }}>Next.</Text>
-          </>
-        )}
+        Never <Text style={{ color: "#fff" }}>Done. </Text>
+        Only <Text style={{ color: "#fff" }}>Next.</Text>
       </Text>
 
       <View style={{ gap: 15 }}>
-        {/* If showing OTP, hide the other fields and only show OTP input */}
-        {!showOtp ? (
-          <>
-            <EmailInput
-              value={email}
-              onChangeText={setEmail}
-              returnKeyType="next"
-              onSubmitEditing={() => passwordRef.current?.focus()}
-              blurOnSubmit={false}
-            />
+        <EmailInput
+          value={email}
+          onChangeText={setEmail}
+          returnKeyType="next"
+          onSubmitEditing={() => usernameRef.current?.focus()}
+          blurOnSubmit={false}
+        />
 
-            <PasswordInput
-              placeholder="Password"
-              value={password}
-              onChangeText={setPassword}
-              ref={passwordRef}
-              returnKeyType="next"
-              onSubmitEditing={() => confirmPasswordRef.current?.focus()}
-              blurOnSubmit={false}
-            />
+        <View style={auth.inputContainer}>
+          <TextInput
+            placeholder="Username"
+            placeholderTextColor="#999"
+            style={auth.input}
+            value={username}
+            onChangeText={setUsername}
+            ref={usernameRef}
+            returnKeyType="next"
+            onSubmitEditing={() => passwordRef.current?.focus()}
+            blurOnSubmit={false}
+            autoCapitalize="none"
+          />
+        </View>
 
-            <PasswordInput
-              placeholder="Confirm Password"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              ref={confirmPasswordRef}
-              returnKeyType="done"
-            />
-          </>
-        ) : (
-          <View style={auth.inputContainer}>
-            <TextInput
-              placeholder="6-Digit OTP Code"
-              placeholderTextColor="#999"
-              style={auth.input}
-              value={otp}
-              onChangeText={setOtp}
-              keyboardType="number-pad"
-              maxLength={6}
-              autoFocus
-            />
-          </View>
-        )}
+        <PasswordInput
+          placeholder="Password"
+          value={password}
+          onChangeText={setPassword}
+          ref={passwordRef}
+          returnKeyType="next"
+          onSubmitEditing={() => confirmPasswordRef.current?.focus()}
+          blurOnSubmit={false}
+        />
+
+        <PasswordInput
+          placeholder="Confirm Password"
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          ref={confirmPasswordRef}
+          returnKeyType="done"
+        />
+
+        {/* 
+        <View style={auth.inputContainer}>
+          <TextInput
+            placeholder="6-Digit OTP Code"
+            placeholderTextColor="#999"
+            style={auth.input}
+            value={otp}
+            onChangeText={setOtp}
+            keyboardType="number-pad"
+            maxLength={6}
+          />
+        </View>
+        */}
       </View>
 
       <TouchableOpacity
         style={[auth.filledBtn, loading && { opacity: 0.5 }]}
-        onPress={showOtp ? verifyOtp : signUpWithEmail}
+        onPress={signUpWithEmail}
         disabled={loading}
       >
         <Text style={auth.filledBtnText}>
-          {loading
-            ? showOtp
-              ? "VERIFYING..."
-              : "SIGNING UP..."
-            : showOtp
-              ? "VERIFY CODE"
-              : "SIGN UP"}
+          {loading ? "SIGNING UP..." : "SIGN UP"}
         </Text>
       </TouchableOpacity>
 
       <View style={auth.registerContainer}>
-        <Text style={auth.registerText}>
-          {showOtp ? "Didn't get a code?" : "Already have an account?"}
-        </Text>
-        <TouchableOpacity
-          onPress={() => (showOtp ? setShowOtp(false) : router.back())}
-        >
-          <Text style={auth.linkText}>
-            {showOtp ? " Go back." : " Sign in."}
-          </Text>
+        <Text style={auth.registerText}>Already have an account?</Text>
+        <TouchableOpacity onPress={() => router.back()}>
+          <Text style={auth.linkText}> Sign in.</Text>
         </TouchableOpacity>
       </View>
     </View>
