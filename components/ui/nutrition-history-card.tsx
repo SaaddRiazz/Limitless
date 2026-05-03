@@ -2,10 +2,15 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
+interface MealItem {
+  name: string;
+  cal: number;
+}
+
 interface MealEntry {
   type: "Breakfast" | "Lunch" | "Dinner" | "Snacks";
   calories: number;
-  label?: string;
+  itemsList?: MealItem[];
 }
 
 interface NutritionHistoryCardProps {
@@ -45,20 +50,27 @@ export const NutritionHistoryCard = ({
 
       <View style={styles.content}>
         {sortedMeals.map((meal, index) => (
-          <View key={index} style={styles.mealRow}>
-            <View>
+          <View key={index} style={styles.mealSection}>
+            <View style={styles.mealHeaderRow}>
               <Text style={styles.titleText}>{meal.type}</Text>
-              {meal.label && (
-                <Text style={styles.subtitleText}>{meal.label}</Text>
-              )}
+              <Text style={styles.mealCalText}>{meal.calories} kcal</Text>
             </View>
-            <Text style={styles.mealCalText}>{meal.calories} kcal</Text>
+
+            {meal.itemsList &&
+              meal.itemsList.map((item, i) => (
+                <View key={i} style={styles.itemRow}>
+                  <Text style={styles.subtitleText} numberOfLines={2}>
+                    {item.name}
+                  </Text>
+                  <Text style={styles.itemCalText}>{item.cal} kcal</Text>
+                </View>
+              ))}
           </View>
         ))}
 
         <View style={[styles.divider, { backgroundColor: `${color}40` }]} />
 
-        <View style={styles.mealRow}>
+        <View style={styles.mealHeaderRow}>
           <Text style={[styles.titleText, { color: color }]}>TOTAL</Text>
           <Text
             style={[styles.mealCalText, { color: color, fontWeight: "900" }]}
@@ -93,12 +105,22 @@ const styles = StyleSheet.create({
     letterSpacing: 1.5,
   },
   content: {
-    gap: 12,
+    gap: 16,
   },
-  mealRow: {
+  mealSection: {
+    gap: 4,
+  },
+  mealHeaderRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+  },
+  itemRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    paddingLeft: 8,
+    marginTop: 2,
   },
   titleText: {
     color: "#fff",
@@ -107,12 +129,23 @@ const styles = StyleSheet.create({
   },
   subtitleText: {
     color: "#666",
+    fontSize: 13,
+    flex: 1,
+    paddingRight: 10,
+  },
+  itemCalText: {
+    color: "#444",
     fontSize: 12,
+    fontWeight: "500",
+    textAlign: "right",
+    minWidth: 60,
   },
   mealCalText: {
     color: "#fff",
     fontSize: 16,
     fontWeight: "600",
+    textAlign: "right",
+    minWidth: 80,
   },
   divider: {
     height: 1,
