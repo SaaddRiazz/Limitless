@@ -277,7 +277,7 @@ export const exercise = StyleSheet.create({
     padding: 15,
     marginBottom: 25,
     borderWidth: 1,
-    borderColor: colors.blue,
+    borderColor: `${colors.blue}80`,
   },
   cardHeader: {
     flexDirection: "row",
@@ -322,13 +322,13 @@ export const exercise = StyleSheet.create({
   },
   input: {
     flex: 1,
-    backgroundColor: colors.black,
+    backgroundColor: `${colors.black}50`,
     color: "#fff",
     textAlign: "center",
     paddingVertical: 6,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: colors.cardBorder,
+    borderColor: `${colors.blue}80`,
   },
   prevContainer: {
     flex: 1,

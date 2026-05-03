@@ -65,10 +65,6 @@ function RootLayoutNav() {
         options={{ title: "Logger", headerShown: false }}
       />
       <Stack.Screen
-        name="screens/chatbot-screen"
-        options={{ title: "Chatbot", headerShown: false }}
-      />
-      <Stack.Screen
         name="screens/chat-screen"
         options={{ title: "AI Trainer", headerShown: false }}
       />
@@ -101,6 +97,10 @@ function RootLayoutNav() {
       <Stack.Screen
         name="screens/tracking/track-workout"
         options={{ title: "Track Workout", headerShown: false }}
+      />
+      <Stack.Screen
+        name="screens/tracking/track-calories"
+        options={{ title: "Track Calories", headerShown: false }}
       />
       <Stack.Screen
         name="screens/tracking/add-workout-plan"
