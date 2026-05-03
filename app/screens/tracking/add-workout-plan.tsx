@@ -1,10 +1,14 @@
 import { BackButton } from "@/components/ui/back-button";
 import { PlanExerciseCard } from "@/components/ui/plan-exercise-card";
+import { supabase } from "@/lib/supabase";
 import { colors } from "@/styles/colors";
 import { exercise, logger, main } from "@/styles/style";
 import * as Crypto from "expo-crypto";
+import { router, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -35,6 +39,7 @@ export default function AddWorkoutPlan() {
       sets: [{ id: Crypto.randomUUID(), weight: "", reps: "" }],
     },
   ]);
+  const [isSaving, setIsSaving] = useState(false);
 
   const addExercise = () => {
     setExercises([
@@ -105,12 +110,60 @@ export default function AddWorkoutPlan() {
     );
   };
 
-  const handleSavePlan = () => {
-    const planData = {
-      title: planName || "New Routine",
-      exercises: exercises,
-    };
-    console.log("Saving Plan:", JSON.stringify(planData, null, 2));
+  const handleSavePlan = async () => {
+    if (!planName.trim()) {
+      Alert.alert("Error", "Please enter a routine name.");
+      return;
+    }
+
+    if (exercises.some((ex) => !ex.name.trim())) {
+      Alert.alert("Error", "All exercises must have a name.");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("No session found");
+
+      // 1. Save Plan
+      const { data: plan, error: planError } = await supabase
+        .from("workout_plans")
+        .insert([{ 
+          user_id: session.user.id, 
+          name: planName, 
+          description: `${exercises.length} Exercises` 
+        }])
+        .select()
+        .single();
+
+      if (planError) throw planError;
+
+      // 2. Save Exercises (schema: plan_id, user_id, exercise_name, target_sets, target_reps, target_weight, order_index)
+      const exercisesToInsert = exercises.map((ex, index) => ({
+        plan_id: plan.id,
+        user_id: session.user.id,
+        exercise_name: ex.name,
+        target_sets: ex.sets.length,
+        target_reps: parseInt(ex.sets[0]?.reps || "0"),
+        target_weight: parseFloat(ex.sets[0]?.weight || "0"),
+        order_index: index
+      }));
+
+      const { error: exercisesError } = await supabase
+        .from("plan_exercises")
+        .insert(exercisesToInsert);
+
+      if (exercisesError) throw exercisesError;
+
+      Alert.alert("Success", "Workout routine saved!");
+      router.back();
+    } catch (error: any) {
+      console.error("Save Error:", error);
+      Alert.alert("Error", error.message);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -173,12 +226,17 @@ export default function AddWorkoutPlan() {
 
       <View style={exercise.fixedFooter}>
         <TouchableOpacity
-          style={[logger.submitBtn, { backgroundColor: colors.blue }]}
+          style={[logger.submitBtn, { backgroundColor: colors.blue }, isSaving && { opacity: 0.7 }]}
           onPress={handleSavePlan}
+          disabled={isSaving}
         >
-          <Text style={[logger.submitBtnText, { color: colors.white }]}>
-            SAVE ROUTINE
-          </Text>
+          {isSaving ? (
+            <ActivityIndicator color={colors.white} />
+          ) : (
+            <Text style={[logger.submitBtnText, { color: colors.white }]}>
+              SAVE ROUTINE
+            </Text>
+          )}
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>

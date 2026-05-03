@@ -1,9 +1,12 @@
 import { HistoryCard } from "@/components/ui/history-card";
+import { supabase } from "@/lib/supabase";
 import { colors } from "@/styles/colors";
-import MaterialCommunityIcons from "@expo/vector-icons/build/MaterialCommunityIcons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -16,14 +19,66 @@ import { auth, logger, main } from "../../../styles/style";
 export default function WorkoutLog() {
   const router = useRouter();
   const [showDropdown, setShowDropdown] = useState(false);
+  const [workoutPlans, setWorkoutPlans] = useState<any[]>([]);
+  const [history, setHistory] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const workoutPlans = [
-    { id: 1, name: "Push" },
-    { id: 2, name: "Pull" },
-    { id: 3, name: "Legs" },
-    { id: 4, name: "Upper" },
-    { id: 5, name: "Lower" },
-  ];
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      // Fetch Plans
+      const { data: plans } = await supabase
+        .from("workout_plans")
+        .select("*")
+        .eq("user_id", session.user.id);
+      
+      setWorkoutPlans(plans || []);
+
+      // Fetch History (logs joined with plans to get names)
+      const { data: logs, error: logsError } = await supabase
+        .from("workout_logs")
+        .select(`
+          *,
+          workout_plans (name)
+        `)
+        .eq("user_id", session.user.id)
+        .order("completed_at", { ascending: false });
+
+      if (logsError) throw logsError;
+
+      // Also fetch set counts for each log to show in subtitle
+      const historyWithDetails = await Promise.all((logs || []).map(async (log: any) => {
+        const { count } = await supabase
+          .from("exercise_sets")
+          .select("*", { count: "exact", head: true })
+          .eq("workout_log_id", log.id);
+        
+        return {
+          ...log,
+          setCount: count || 0
+        };
+      }));
+
+      setHistory(historyWithDetails);
+    } catch (error: any) {
+      console.error("Fetch Log Error:", error.message);
+      Alert.alert("Error", "Failed to load workout history.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getLogColor = (index: number) => {
+    const palette = [colors.blue, colors.green, colors.orange, colors.red, colors.purple];
+    return palette[index % palette.length];
+  };
 
   return (
     <View style={main.container}>
@@ -46,12 +101,16 @@ export default function WorkoutLog() {
         </TouchableOpacity>
         {showDropdown && (
           <View style={styles.dropdown}>
-            {workoutPlans.map((plan) => (
+            {workoutPlans.length > 0 ? workoutPlans.map((plan) => (
               <TouchableOpacity
                 key={plan.id}
                 style={styles.dropdownItem}
                 onPress={() => {
-                  router.push("/screens/tracking/track-workout");
+                  setShowDropdown(false);
+                  router.push({
+                    pathname: "/screens/tracking/track-workout",
+                    params: { planId: plan.id, planName: plan.name }
+                  });
                 }}
               >
                 <Text style={{ color: "#fff" }}>{plan.name}</Text>
@@ -61,7 +120,11 @@ export default function WorkoutLog() {
                   color="#555"
                 />
               </TouchableOpacity>
-            ))}
+            )) : (
+              <View style={styles.dropdownItem}>
+                <Text style={{ color: colors.textDark }}>No plans saved.</Text>
+              </View>
+            )}
           </View>
         )}
       </View>
@@ -70,41 +133,25 @@ export default function WorkoutLog() {
         <Text style={[logger.sectionTitle, { marginTop: 40 }]}>
           Recent History
         </Text>
-        <HistoryCard
-          date="Oct 24, 2025"
-          title="Pull"
-          subtitle="6 Exercises • 18 Sets"
-          color={colors.blue}
-          onPress={() => console.log("View Details")}
-        />
-        <HistoryCard
-          date="Oct 24, 2025"
-          title="Push"
-          subtitle="6 Exercises • 18 Sets"
-          color={colors.green}
-          onPress={() => console.log("View Details")}
-        />
-        <HistoryCard
-          date="Oct 24, 2025"
-          title="Legs"
-          subtitle="6 Exercises • 18 Sets"
-          color={colors.yellow}
-          onPress={() => console.log("View Details")}
-        />
-        <HistoryCard
-          date="Oct 24, 2025"
-          title="Upper"
-          subtitle="6 Exercises • 18 Sets"
-          color={colors.orange}
-          onPress={() => console.log("View Details")}
-        />
-        <HistoryCard
-          date="Oct 24, 2025"
-          title="Lower"
-          subtitle="6 Exercises • 18 Sets"
-          color={colors.red}
-          onPress={() => console.log("View Details")}
-        />
+
+        {loading ? (
+          <ActivityIndicator size="large" color={colors.blue} style={{ marginTop: 20 }} />
+        ) : history.length > 0 ? (
+          history.map((log, index) => (
+            <HistoryCard
+              key={log.id}
+              date={new Date(log.completed_at).toLocaleDateString()}
+              title={log.workout_plans?.name || "Custom Workout"}
+              subtitle={`${log.setCount} Total Sets completed`}
+              color={getLogColor(index)}
+              onPress={() => console.log("View Details")}
+            />
+          ))
+        ) : (
+          <Text style={{ color: colors.textDark, textAlign: "center", marginTop: 20 }}>
+            No workout logs found. Start your first session!
+          </Text>
+        )}
       </ScrollView>
     </View>
   );
