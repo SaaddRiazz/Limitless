@@ -7,7 +7,7 @@ export const XP_VALUES = {
   WORKOUT_COMPLETE: 100,
 };
 
-const XP_PER_LEVEL = 2000;
+export const getXPForLevel = (level: number) => level * 100;
 
 export async function addXP(amount: number) {
   try {
@@ -25,27 +25,28 @@ export async function addXP(amount: number) {
 
     if (fetchError) throw fetchError;
 
-    let newXP = (profile?.xp || 0) + amount;
-    let newLevel = profile?.level || 1;
+    let currentXP = (profile?.xp || 0) + amount;
+    let currentLevel = profile?.level || 1;
 
-    // Calculate level increase
-    while (newXP >= XP_PER_LEVEL) {
-      newXP -= XP_PER_LEVEL;
-      newLevel += 1;
+    // Calculate level increase with dynamic thresholds
+    // Level 1: 100 XP, Level 2: 200 XP, etc.
+    while (currentXP >= getXPForLevel(currentLevel)) {
+      currentXP -= getXPForLevel(currentLevel);
+      currentLevel += 1;
     }
 
     // Update profile
     const { error: updateError } = await supabase
       .from("profiles")
       .update({
-        xp: newXP,
-        level: newLevel
+        xp: currentXP,
+        level: currentLevel
       })
       .eq("id", userId);
 
     if (updateError) throw updateError;
 
-    return { newXP, newLevel };
+    return { newXP: currentXP, newLevel: currentLevel };
   } catch (error) {
     console.error("Error adding XP:", error);
     return null;

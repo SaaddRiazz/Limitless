@@ -1,5 +1,6 @@
 import { useFocusEffect } from "@react-navigation/native";
 import { supabase } from "@/lib/supabase";
+import { getXPForLevel } from "@/lib/xp-service";
 import { decode } from "base64-arraybuffer";
 import * as FileSystem from "expo-file-system/legacy";
 import * as ImagePicker from "expo-image-picker";
@@ -30,7 +31,7 @@ export default function ProfileScreen() {
     type: "success" | "error";
   } | null>(null);
 
-  const nextLevelXP = 2000; // You can adjust this logic based on your level system
+  const nextLevelXP = getXPForLevel(level);
   const progressPercent = Math.min(Math.max((xp / nextLevelXP) * 100, 0), 100);
   const animatedWidth = useRef(new Animated.Value(0)).current;
 

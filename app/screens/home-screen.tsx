@@ -1,6 +1,7 @@
 import { useFocusEffect } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { supabase } from "@/lib/supabase";
+import { addXP, getXPForLevel, XP_VALUES } from "@/lib/xp-service";
 import { router } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -29,7 +30,7 @@ export default function HomeScreen({ navigation }: any) {
   });
   const [loading, setLoading] = useState(true);
 
-  const nextLevelXP = 2000;
+  const nextLevelXP = getXPForLevel(profile.level);
   const progressPercent = Math.min(
     Math.max((profile.xp / nextLevelXP) * 100, 0),
     100,
