@@ -1,6 +1,7 @@
 import { BackButton } from "@/components/ui/back-button";
 import { ExerciseCard } from "@/components/ui/exercise-card";
 import { supabase } from "@/lib/supabase";
+import { addXP, XP_VALUES } from "@/lib/xp-service";
 import { colors } from "@/styles/colors";
 import { exercise, logger, main } from "@/styles/style";
 import * as Crypto from "expo-crypto";
@@ -169,6 +170,7 @@ export default function TrackWorkout() {
 
       if (setsError) throw setsError;
 
+      await addXP(XP_VALUES.WORKOUT_COMPLETE);
       Alert.alert("Victory!", "Workout completed and saved!");
       router.dismissAll();
       router.push("/screens/logger/workout-log");

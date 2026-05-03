@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { addXP, XP_VALUES } from "@/lib/xp-service";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import {
@@ -108,6 +109,7 @@ export default function WaterLog() {
 
       if (error) throw error;
 
+      await addXP(XP_VALUES.WATER_LOG);
       setSavedMl(ml);
       fetchInitialData();
     } catch (error) {
