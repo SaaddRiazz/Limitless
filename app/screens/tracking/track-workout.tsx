@@ -133,7 +133,8 @@ export default function TrackWorkout() {
       if (setsError) throw setsError;
 
       Alert.alert("Victory!", "Workout completed and saved!");
-      router.replace("/screens/logger/workout-log");
+      router.dismissAll();
+      router.push("/screens/logger/workout-log");
     } catch (error: any) {
       console.error("Finish Error:", error);
       Alert.alert("Error", error.message);

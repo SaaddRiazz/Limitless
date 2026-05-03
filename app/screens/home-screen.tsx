@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -174,7 +175,11 @@ export default function HomeScreen({ navigation }: any) {
         </ScrollView>
       </View>
 
-      <TouchableOpacity style={main.workoutCard} activeOpacity={0.9}>
+      <TouchableOpacity 
+        style={main.workoutCard} 
+        activeOpacity={0.9}
+        onPress={() => router.push("/screens/logger/workout-log")}
+      >
         <View>
           <Text
             style={{
@@ -193,7 +198,7 @@ export default function HomeScreen({ navigation }: any) {
               fontWeight: "600",
             }}
           >
-            Push Pull Legs - Day 3
+            Select a routine to begin
           </Text>
         </View>
         <MaterialCommunityIcons name="play-circle" size={50} color="#fff" />
