@@ -71,15 +71,11 @@ export default function WorkoutScreen() {
 
   return (
     <View style={main.container}>
-      <View style={{ marginTop: 60, marginBottom: 20 }}>
-        <Text style={main.headerTitle}>WORKOUTS</Text>
-      </View>
+      <Text style={[main.headerTitle, { marginBottom: 30, marginTop: 20 }]}>
+        WORKOUT
+      </Text>
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        style={{ flex: 1 }}
-        contentContainerStyle={{ paddingBottom: 100 }}
-      >
+      <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
         <TouchableOpacity
           style={[
             auth.filledBtn,

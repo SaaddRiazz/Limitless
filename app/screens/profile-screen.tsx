@@ -213,113 +213,123 @@ export default function ProfileScreen() {
   }
 
   return (
-    <ScrollView style={main.container}>
-      <Text style={main.headerTitle}>PROFILE</Text>
+    <View style={main.container}>
+      <Text style={[main.headerTitle, { marginBottom: 30, marginTop: 20 }]}>
+        PROFILE
+      </Text>
+      <ScrollView>
+        {/* Avatar Section */}
+        <View style={{ alignItems: "center", marginBottom: 30 }}>
+          <TouchableOpacity onPress={pickImage} disabled={uploading}>
+            <View
+              style={{
+                width: 120,
+                height: 120,
+                borderRadius: 60,
+                backgroundColor: "#2e2e2e",
+                justifyContent: "center",
+                alignItems: "center",
+                borderWidth: 2,
+                borderColor: "#2196F3",
+                overflow: "hidden",
+              }}
+            >
+              {uploading ? (
+                <ActivityIndicator color="#2196F3" />
+              ) : avatarUrl ? (
+                <Image
+                  source={{ uri: avatarUrl }}
+                  style={{ width: "100%", height: "100%" }}
+                />
+              ) : (
+                <Text style={{ color: "#b3b3b3", fontSize: 14 }}>
+                  Add Photo
+                </Text>
+              )}
+            </View>
+          </TouchableOpacity>
+        </View>
 
-      {/* Avatar Section */}
-      <View style={{ alignItems: "center", marginBottom: 30 }}>
-        <TouchableOpacity onPress={pickImage} disabled={uploading}>
+        {/* XP Card - Matched with Dashboard */}
+        <View style={main.levelContainer}>
           <View
-            style={{
-              width: 120,
-              height: 120,
-              borderRadius: 60,
-              backgroundColor: "#2e2e2e",
-              justifyContent: "center",
-              alignItems: "center",
-              borderWidth: 2,
-              borderColor: "#2196F3",
-              overflow: "hidden",
-            }}
+            style={{ flexDirection: "row", justifyContent: "space-between" }}
           >
-            {uploading ? (
-              <ActivityIndicator color="#2196F3" />
-            ) : avatarUrl ? (
-              <Image
-                source={{ uri: avatarUrl }}
-                style={{ width: "100%", height: "100%" }}
-              />
-            ) : (
-              <Text style={{ color: "#b3b3b3", fontSize: 14 }}>Add Photo</Text>
-            )}
+            <Text style={{ color: "#fff", fontWeight: "bold" }}>
+              Level {level}
+            </Text>
+            <Text style={{ color: "#2196F3", fontWeight: "bold" }}>
+              {xp.toLocaleString()} / {nextLevelXP.toLocaleString()} XP
+            </Text>
+          </View>
+
+          <View style={main.progressBarBg}>
+            <Animated.View
+              style={[
+                main.progressBarFill,
+                {
+                  width: animatedWidth.interpolate({
+                    inputRange: [0, 100],
+                    outputRange: ["0%", "100%"],
+                  }),
+                },
+              ]}
+            />
+          </View>
+        </View>
+
+        {/* Username Section */}
+        <View style={{ gap: 10, marginBottom: 20 }}>
+          <Text style={{ color: "#b3b3b3", marginLeft: 5 }}>Username</Text>
+          <View style={auth.inputContainer}>
+            <TextInput
+              style={auth.input}
+              value={username}
+              onChangeText={setUsername}
+              placeholder="Set your username"
+              placeholderTextColor="#999"
+            />
+          </View>
+        </View>
+
+        {/* Save Button */}
+        <TouchableOpacity
+          style={[auth.filledBtn, (loading || uploading) && { opacity: 0.5 }]}
+          onPress={() => updateProfile({ username, avatar_url: avatarUrl })}
+          disabled={loading || uploading}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+            {loading && <ActivityIndicator color="#fff" size="small" />}
+            <Text style={auth.filledBtnText}>SAVE PROFILE</Text>
           </View>
         </TouchableOpacity>
-      </View>
 
-      {/* XP Card - Matched with Dashboard */}
-      <View style={main.levelContainer}>
-        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-          <Text style={{ color: "#fff", fontWeight: "bold" }}>
-            Level {level}
-          </Text>
-          <Text style={{ color: "#2196F3", fontWeight: "bold" }}>
-            {xp.toLocaleString()} / {nextLevelXP.toLocaleString()} XP
-          </Text>
-        </View>
+        {/* Success/Error Message */}
+        {message && (
+          <View style={{ marginTop: 15, alignItems: "center" }}>
+            <Text
+              style={{
+                color: message.type === "success" ? "#4CAF50" : "#F44336",
+                fontWeight: "bold",
+                fontSize: 14,
+              }}
+            >
+              {message.text}
+            </Text>
+          </View>
+        )}
 
-        <View style={main.progressBarBg}>
-          <Animated.View
-            style={[
-              main.progressBarFill,
-              {
-                width: animatedWidth.interpolate({
-                  inputRange: [0, 100],
-                  outputRange: ["0%", "100%"],
-                }),
-              },
-            ]}
-          />
-        </View>
-      </View>
-
-      {/* Username Section */}
-      <View style={{ gap: 10, marginBottom: 20 }}>
-        <Text style={{ color: "#b3b3b3", marginLeft: 5 }}>Username</Text>
-        <View style={auth.inputContainer}>
-          <TextInput
-            style={auth.input}
-            value={username}
-            onChangeText={setUsername}
-            placeholder="Set your username"
-            placeholderTextColor="#999"
-          />
-        </View>
-      </View>
-
-      {/* Save Button */}
-      <TouchableOpacity
-        style={[auth.filledBtn, (loading || uploading) && { opacity: 0.5 }]}
-        onPress={() => updateProfile({ username, avatar_url: avatarUrl })}
-        disabled={loading || uploading}
-      >
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-          {loading && <ActivityIndicator color="#fff" size="small" />}
-          <Text style={auth.filledBtnText}>SAVE PROFILE</Text>
-        </View>
-      </TouchableOpacity>
-
-      {/* Success/Error Message */}
-      {message && (
-        <View style={{ marginTop: 15, alignItems: "center" }}>
-          <Text
-            style={{
-              color: message.type === "success" ? "#4CAF50" : "#F44336",
-              fontWeight: "bold",
-              fontSize: 14,
-            }}
-          >
-            {message.text}
-          </Text>
-        </View>
-      )}
-
-      {/* Logout Button */}
-      <TouchableOpacity
-        style={[auth.filledBtn, { backgroundColor: "#f44336", marginTop: 20 }]}
-        onPress={handleLogout}
-      >
-        <Text style={auth.filledBtnText}>LOGOUT</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        {/* Logout Button */}
+        <TouchableOpacity
+          style={[
+            auth.filledBtn,
+            { backgroundColor: "#f44336", marginTop: 20 },
+          ]}
+          onPress={handleLogout}
+        >
+          <Text style={auth.filledBtnText}>LOGOUT</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </View>
   );
 }

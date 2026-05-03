@@ -16,9 +16,12 @@ import Markdown from "react-native-markdown-display";
 import { auth, main } from "../../styles/style";
 
 // Initialize Gemini API
-const genAI = new GoogleGenerativeAI(process.env.EXPO_PUBLIC_GEMINI_API_KEY || "");
+const genAI = new GoogleGenerativeAI(
+  process.env.EXPO_PUBLIC_GEMINI_API_KEY || "",
+);
 
-const SYSTEM_INSTRUCTION = "You are 'Limitless AI,' a professional and motivating fitness trainer. Your goal is to provide concise, science-based advice on workouts, nutrition, and recovery. Keep responses encouraging but direct. Use formatting like bullet points for clarity. If asked about non-fitness topics, gently redirect the user back to their fitness goals.";
+const SYSTEM_INSTRUCTION =
+  "You are 'Limitless AI,' a professional and motivating fitness trainer. Your goal is to provide concise, science-based advice on workouts, nutrition, and recovery. Keep responses encouraging but direct. Use formatting like bullet points for clarity. If asked about non-fitness topics, gently redirect the user back to their fitness goals.";
 
 interface Message {
   id: string;
@@ -61,7 +64,9 @@ export default function ChatScreen() {
       let model;
       try {
         // User's specific model choice
-        model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
+        model = genAI.getGenerativeModel({
+          model: "gemini-3.1-flash-lite-preview",
+        });
         const prompt = `${SYSTEM_INSTRUCTION}\n\nUser: ${inputText}`;
         const result = await model.generateContent(prompt);
         var response = await result.response;
@@ -109,20 +114,23 @@ export default function ChatScreen() {
         {isUser ? (
           <Text style={styles.messageText}>{item.text}</Text>
         ) : (
-          <Markdown style={markdownStyles}>
-            {item.text}
-          </Markdown>
+          <Markdown style={markdownStyles}>{item.text}</Markdown>
         )}
         <Text style={styles.timestamp}>
-          {item.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          {item.timestamp.toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
         </Text>
       </View>
     );
   };
 
   return (
-    <View style={[main.container, { paddingTop: 40, paddingBottom: 0 }]}>
-      <Text style={main.headerTitle}>TRAINER AI</Text>
+    <View style={main.container}>
+      <Text style={[main.headerTitle, { marginBottom: 30, marginTop: 20 }]}>
+        TRAINER AI
+      </Text>
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -159,7 +167,10 @@ export default function ChatScreen() {
             <TouchableOpacity
               onPress={sendMessage}
               disabled={isLoading || !inputText.trim()}
-              style={[styles.sendButton, (!inputText.trim() || isLoading) && { opacity: 0.5 }]}
+              style={[
+                styles.sendButton,
+                (!inputText.trim() || isLoading) && { opacity: 0.5 },
+              ]}
             >
               <MaterialCommunityIcons name="send" size={24} color="#FFF" />
             </TouchableOpacity>
