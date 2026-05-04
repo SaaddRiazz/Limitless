@@ -141,7 +141,7 @@ export default function WorkoutLog() {
             <HistoryCard
               key={log.id}
               date={new Date(log.completed_at).toLocaleDateString()}
-              title={log.workout_plans?.name || "Custom Workout"}
+              title={log.workout_name || log.workout_plans?.name || "Custom Workout"}
               subtitle={`${log.setCount} Total Sets completed`}
               color={getLogColor(index)}
               onPress={() => console.log("View Details")}

@@ -1,8 +1,8 @@
 import { supabase } from "@/lib/supabase";
 import { colors } from "@/styles/colors";
 import { main } from "@/styles/style";
-import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import React, { useCallback, useState } from "react";
 import {
     ScrollView,
     StyleSheet,
@@ -15,9 +15,11 @@ export default function AdminDashboard() {
   const router = useRouter();
   const [stats, setStats] = useState({ users: 0, workouts: 0, exercises: 0 });
 
-  useEffect(() => {
-    fetchStats();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchStats();
+    }, [])
+  );
 
   const fetchStats = async () => {
     const { count: users } = await supabase
