@@ -39,7 +39,10 @@ function RootLayoutNav() {
   }, [session, isLoading, segments]);
 
   return (
-    <Stack screenOptions={{ headerShown: false }} initialRouteName="splash">
+    <Stack
+      screenOptions={{ headerShown: false }}
+      initialRouteName="screens/admin/dashboard"
+    >
       <Stack.Screen name="splash" />
       <Stack.Screen name="index" />
       <Stack.Screen name="sign-in" options={{ title: "Log In" }} />
@@ -60,6 +63,12 @@ function RootLayoutNav() {
       <Stack.Screen name="screens/tracking/track-workout" />
       <Stack.Screen name="screens/tracking/add-workout-plan" />
       <Stack.Screen name="screens/tracking/edit-workout-plan" />
+
+      <Stack.Screen name="screens/admin/dashboard" />
+      <Stack.Screen name="screens/admin/global-workouts-master" />
+      <Stack.Screen name="screens/admin/add-global-workout" />
+      <Stack.Screen name="screens/admin/edit-global-workout" />
+      <Stack.Screen name="screens/admin/add-global-exercise" />
     </Stack>
   );
 }
