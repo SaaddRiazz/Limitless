@@ -31,30 +31,24 @@ export default function AddGlobalWorkout() {
   // Search state
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   // Search logic
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
-      if (searchQuery.trim()) {
-        searchGlobalExercises();
-      } else {
-        setSearchResults([]);
-      }
-    }, 500);
+      searchGlobalExercises();
+    }, 300);
 
     return () => clearTimeout(delayDebounceFn);
   }, [searchQuery]);
 
   const searchGlobalExercises = async () => {
-    setIsSearching(true);
-    const { data } = await supabase
-      .from("global_exercises")
-      .select("*")
-      .ilike("name", `%${searchQuery}%`)
-      .limit(5);
+    let query = supabase.from("global_exercises").select("*");
+    if (searchQuery.trim()) {
+      query = query.ilike("name", `%${searchQuery.trim()}%`);
+    }
+    const { data } = await query.limit(20);
     setSearchResults(data || []);
-    setIsSearching(false);
   };
 
   const addExerciseToWorkout = (name: string) => {
@@ -170,6 +164,8 @@ export default function AddGlobalWorkout() {
               placeholderTextColor="#444"
               value={searchQuery}
               onChangeText={setSearchQuery}
+              onFocus={() => setIsSearchFocused(true)}
+              onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
             />
             {searchQuery.length > 0 && (
               <TouchableOpacity
@@ -186,7 +182,7 @@ export default function AddGlobalWorkout() {
           </View>
 
           {/* Search Results Dropdown */}
-          {searchResults.length > 0 && (
+          {isSearchFocused && searchResults.length > 0 && (
             <View style={styles.resultsContainer}>
               {searchResults.map((item) => (
                 <TouchableOpacity

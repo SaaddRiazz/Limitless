@@ -1,8 +1,9 @@
 import { colors } from "@/styles/colors";
 import { exercise } from "@/styles/style";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Alert, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { supabase } from "@/lib/supabase";
 
 interface SetEntry {
   id: string;
@@ -48,6 +49,23 @@ export const PlanExerciseCard: React.FC<PlanExerciseCardProps> = ({
     }
   };
 
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isFocused, setIsFocused] = useState(false);
+
+  useEffect(() => {
+    const searchExercises = async () => {
+      let query = supabase.from("global_exercises").select("*");
+      if (ex.name.trim()) {
+        query = query.ilike("name", `%${ex.name.trim()}%`);
+      }
+      const { data } = await query.limit(10);
+      setSearchResults(data || []);
+    };
+    
+    const timeout = setTimeout(searchExercises, 300);
+    return () => clearTimeout(timeout);
+  }, [ex.name]);
+
   return (
     <View style={exercise.exerciseCard}>
       <View style={exercise.cardHeader}>
@@ -61,13 +79,47 @@ export const PlanExerciseCard: React.FC<PlanExerciseCardProps> = ({
         </TouchableOpacity>
       </View>
 
-      <TextInput
-        style={exercise.exerciseInput}
-        value={ex.name}
-        onChangeText={onUpdateName}
-        placeholder="Exercise Name"
-        placeholderTextColor="#444"
-      />
+      <View style={{ zIndex: 100 }}>
+        <TextInput
+          style={exercise.exerciseInput}
+          value={ex.name}
+          onChangeText={onUpdateName}
+          placeholder="Exercise Name"
+          placeholderTextColor="#444"
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setTimeout(() => setIsFocused(false), 200)}
+        />
+        
+        {isFocused && searchResults.length > 0 && (
+          <View style={{
+            backgroundColor: "#1a1a1a",
+            borderRadius: 10,
+            marginTop: -10,
+            marginBottom: 10,
+            borderWidth: 1,
+            borderColor: "#333",
+            overflow: "hidden"
+          }}>
+            {searchResults.map((item) => (
+              <TouchableOpacity
+                key={item.id}
+                style={{
+                  padding: 12,
+                  borderBottomWidth: 1,
+                  borderBottomColor: "#222",
+                  flexDirection: "row"
+                }}
+                onPress={() => {
+                  onUpdateName(item.name);
+                  setIsFocused(false);
+                }}
+              >
+                <Text style={{ color: "#fff" }}>{item.name}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+      </View>
 
       <View style={exercise.setRow}>
         <Text style={[exercise.headerText, { width: 30 }]}>SET</Text>
