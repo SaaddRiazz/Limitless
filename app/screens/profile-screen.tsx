@@ -18,6 +18,7 @@ import {
   View,
 } from "react-native";
 import { auth, main } from "../../styles/style";
+import { useRouter } from "expo-router";
 
 export default function ProfileScreen() {
   const [loading, setLoading] = useState(true);
@@ -30,6 +31,8 @@ export default function ProfileScreen() {
     text: string;
     type: "success" | "error";
   } | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const router = useRouter();
 
   const nextLevelXP = getXPForLevel(level);
   const progressPercent = Math.min(Math.max((xp / nextLevelXP) * 100, 0), 100);
@@ -64,7 +67,7 @@ export default function ProfileScreen() {
 
       const { data, error, status } = await supabase
         .from("profiles")
-        .select(`username, avatar_url, xp, level`)
+        .select(`username, avatar_url, xp, level, is_admin`)
         .eq("id", user.id)
         .single();
 
@@ -77,6 +80,7 @@ export default function ProfileScreen() {
         setAvatarUrl(data.avatar_url);
         setXp(data.xp || 0);
         setLevel(data.level || 1);
+        setIsAdmin(data.is_admin || false);
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -321,6 +325,19 @@ export default function ProfileScreen() {
               {message.text}
             </Text>
           </View>
+        )}
+
+        {/* Admin Dashboard Button */}
+        {isAdmin && (
+          <TouchableOpacity
+            style={[
+              auth.filledBtn,
+              { backgroundColor: "#9C27B0", marginTop: 20 },
+            ]}
+            onPress={() => router.push("/screens/admin/dashboard" as any)}
+          >
+            <Text style={auth.filledBtnText}>ADMIN PANEL</Text>
+          </TouchableOpacity>
         )}
 
         {/* Logout Button */}

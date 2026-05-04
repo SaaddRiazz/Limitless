@@ -38,6 +38,8 @@ export default function CommunityScreen() {
   const [postText, setPostText] = useState("");
   const [pickedImage, setPickedImage] = useState<string | null>(null);
   const [isPosting, setIsPosting] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [editingPostId, setEditingPostId] = useState<string | null>(null);
 
   useEffect(() => {
     init();
@@ -47,8 +49,16 @@ export default function CommunityScreen() {
     const {
       data: { session },
     } = await supabase.auth.getSession();
-    if (session) setUserId(session.user.id);
-    await fetchPosts(session?.user.id ?? null);
+    if (session) {
+      setUserId(session.user.id);
+      const { data } = await supabase
+        .from("profiles")
+        .select("is_admin")
+        .eq("id", session.user.id)
+        .single();
+      if (data?.is_admin) setIsAdmin(true);
+    }
+    await fetchPosts(session?.user?.id ?? null);
   };
 
   const fetchPosts = async (uid: string | null) => {
@@ -101,9 +111,10 @@ export default function CommunityScreen() {
 
     setIsPosting(true);
     try {
-      let imageUrl: string | null = null;
+      let imageUrl: string | null = pickedImage;
 
-      if (pickedImage) {
+      // Only upload if pickedImage is a local file URI
+      if (pickedImage && !pickedImage.startsWith("http")) {
         // Convert to blob and upload
         const response = await fetch(pickedImage);
         const blob = await response.blob();
@@ -123,26 +134,68 @@ export default function CommunityScreen() {
         imageUrl = urlData.publicUrl;
       }
 
-      const { error } = await supabase.from("community_posts").insert([
-        {
-          user_id: userId,
-          content: postText.trim(),
-          image_url: imageUrl,
-          likes_count: 0,
-        },
-      ]);
+      if (editingPostId) {
+        const { error } = await supabase
+          .from("community_posts")
+          .update({
+            content: postText.trim(),
+            image_url: imageUrl,
+          })
+          .eq("id", editingPostId);
+        
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("community_posts").insert([
+          {
+            user_id: userId,
+            content: postText.trim(),
+            image_url: imageUrl,
+            likes_count: 0,
+          },
+        ]);
+        if (error) throw error;
+      }
 
-      if (error) throw error;
-
-      setPostText("");
-      setPickedImage(null);
-      setModalVisible(false);
+      closeModal();
       fetchPosts(userId);
     } catch (error: any) {
-      Alert.alert("Error", error.message || "Failed to post.");
+      Alert.alert("Error", error.message || "Failed to save post.");
     } finally {
       setIsPosting(false);
     }
+  };
+
+  const closeModal = () => {
+    setPostText("");
+    setPickedImage(null);
+    setEditingPostId(null);
+    setModalVisible(false);
+  };
+
+  const startEdit = (post: Post) => {
+    setEditingPostId(post.id);
+    setPostText(post.content);
+    setPickedImage(post.image_url);
+    setModalVisible(true);
+  };
+
+  const deletePost = async (id: string) => {
+    Alert.alert("Delete Post", "Are you sure you want to delete this post?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            const { error } = await supabase.from("community_posts").delete().eq("id", id);
+            if (error) throw error;
+            fetchPosts(userId);
+          } catch (err: any) {
+            Alert.alert("Error", err.message || "Could not delete post.");
+          }
+        },
+      },
+    ]);
   };
 
   const toggleLike = async (post: Post) => {
@@ -187,26 +240,42 @@ export default function CommunityScreen() {
   const renderPost = ({ item }: { item: Post }) => (
     <View style={styles.postCard}>
       <View style={styles.postHeader}>
-        {item.profiles?.avatar_url ? (
-          <Image
-            source={{ uri: item.profiles.avatar_url }}
-            style={styles.avatar}
-          />
-        ) : (
-          <View style={styles.avatarPlaceholder}>
-            <MaterialCommunityIcons name="account" size={24} color="#666" />
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+          {item.profiles?.avatar_url ? (
+            <Image
+              source={{ uri: item.profiles.avatar_url }}
+              style={styles.avatar}
+            />
+          ) : (
+            <View style={styles.avatarPlaceholder}>
+              <MaterialCommunityIcons name="account" size={24} color="#666" />
+            </View>
+          )}
+          <View>
+            <Text style={styles.username}>
+              {item.profiles?.username || "User"}
+            </Text>
+            <Text style={styles.timestamp}>
+              {new Date(item.created_at).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+              })}
+            </Text>
           </View>
-        )}
-        <View>
-          <Text style={styles.username}>
-            {item.profiles?.username || "User"}
-          </Text>
-          <Text style={styles.timestamp}>
-            {new Date(item.created_at).toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-            })}
-          </Text>
+        </View>
+
+        {/* Action Buttons */}
+        <View style={{ flexDirection: "row", gap: 12 }}>
+          {(item.user_id === userId || isAdmin) && (
+            <TouchableOpacity onPress={() => startEdit(item)}>
+              <MaterialCommunityIcons name="pencil" size={20} color="#888" />
+            </TouchableOpacity>
+          )}
+          {(item.user_id === userId || isAdmin) && (
+            <TouchableOpacity onPress={() => deletePost(item.id)}>
+              <MaterialCommunityIcons name="trash-can-outline" size={20} color={colors.red} />
+            </TouchableOpacity>
+          )}
         </View>
       </View>
 
@@ -290,13 +359,13 @@ export default function CommunityScreen() {
         visible={modalVisible}
         animationType="slide"
         transparent
-        onRequestClose={() => setModalVisible(false)}
+        onRequestClose={closeModal}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>New Post</Text>
-              <TouchableOpacity onPress={() => setModalVisible(false)}>
+              <Text style={styles.modalTitle}>{editingPostId ? "Edit Post" : "New Post"}</Text>
+              <TouchableOpacity onPress={closeModal}>
                 <MaterialCommunityIcons name="close" size={24} color="#fff" />
               </TouchableOpacity>
             </View>
@@ -388,8 +457,8 @@ const styles = StyleSheet.create({
   postHeader: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: 10,
-    gap: 10,
   },
   avatar: {
     width: 36,
