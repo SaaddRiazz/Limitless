@@ -20,6 +20,7 @@ export default function WorkoutLog() {
   const router = useRouter();
   const [showDropdown, setShowDropdown] = useState(false);
   const [workoutPlans, setWorkoutPlans] = useState<any[]>([]);
+  const [globalWorkouts, setGlobalWorkouts] = useState<any[]>([]);
   const [history, setHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -40,6 +41,14 @@ export default function WorkoutLog() {
         .eq("user_id", session.user.id);
       
       setWorkoutPlans(plans || []);
+
+      // Fetch Global Workouts
+      const { data: globals } = await supabase
+        .from("global_workouts")
+        .select("*")
+        .order("created_at", { ascending: false });
+        
+      setGlobalWorkouts(globals || []);
 
       // Fetch History (logs joined with plans to get names)
       const { data: logs, error: logsError } = await supabase
@@ -101,30 +110,59 @@ export default function WorkoutLog() {
         </TouchableOpacity>
         {showDropdown && (
           <View style={styles.dropdown}>
-            {workoutPlans.length > 0 ? workoutPlans.map((plan) => (
-              <TouchableOpacity
-                key={plan.id}
-                style={styles.dropdownItem}
-                onPress={() => {
-                  setShowDropdown(false);
-                  router.push({
-                    pathname: "/screens/tracking/track-workout",
-                    params: { planId: plan.id, planName: plan.name }
-                  });
-                }}
-              >
-                <Text style={{ color: "#fff" }}>{plan.name}</Text>
-                <MaterialCommunityIcons
-                  name="chevron-right"
-                  size={20}
-                  color="#555"
-                />
-              </TouchableOpacity>
-            )) : (
-              <View style={styles.dropdownItem}>
-                <Text style={{ color: colors.textDark }}>No plans saved.</Text>
-              </View>
-            )}
+            <ScrollView nestedScrollEnabled>
+              <Text style={styles.dropdownSectionLabel}>MY ROUTINES</Text>
+              {workoutPlans.length > 0 ? workoutPlans.map((plan) => (
+                <TouchableOpacity
+                  key={plan.id}
+                  style={styles.dropdownItem}
+                  onPress={() => {
+                    setShowDropdown(false);
+                    router.push({
+                      pathname: "/screens/tracking/track-workout",
+                      params: { planId: plan.id, planName: plan.name }
+                    });
+                  }}
+                >
+                  <Text style={{ color: "#fff" }}>{plan.name}</Text>
+                  <MaterialCommunityIcons
+                    name="chevron-right"
+                    size={20}
+                    color="#555"
+                  />
+                </TouchableOpacity>
+              )) : (
+                <View style={styles.dropdownItem}>
+                  <Text style={{ color: colors.textDark }}>No plans saved.</Text>
+                </View>
+              )}
+
+              <Text style={[styles.dropdownSectionLabel, { color: colors.orange, borderTopWidth: 1, borderTopColor: '#222' }]}>GLOBAL ROUTINES</Text>
+              {globalWorkouts.length > 0 ? globalWorkouts.map((workout) => (
+                <TouchableOpacity
+                  key={workout.id}
+                  style={styles.dropdownItem}
+                  onPress={() => {
+                    setShowDropdown(false);
+                    router.push({
+                      pathname: "/screens/tracking/track-workout",
+                      params: { planId: workout.id, planName: workout.name, isGlobal: "true" }
+                    });
+                  }}
+                >
+                  <Text style={{ color: "#fff" }}>{workout.name}</Text>
+                  <MaterialCommunityIcons
+                    name="chevron-right"
+                    size={20}
+                    color="#555"
+                  />
+                </TouchableOpacity>
+              )) : (
+                <View style={styles.dropdownItem}>
+                  <Text style={{ color: colors.textDark }}>No global routines.</Text>
+                </View>
+              )}
+            </ScrollView>
           </View>
         )}
       </View>
@@ -167,6 +205,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 55,
     width: "100%",
+    maxHeight: 350,
     zIndex: 2000,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 10 },
@@ -180,6 +219,14 @@ const styles = StyleSheet.create({
     borderBottomColor: "#222",
     flexDirection: "row",
     justifyContent: "space-between",
+  },
+  dropdownSectionLabel: {
+    color: colors.blue,
+    padding: 10,
+    paddingBottom: 5,
+    fontSize: 12,
+    fontWeight: "bold",
+    letterSpacing: 1,
   },
   historyCard: {
     backgroundColor: "#111",
