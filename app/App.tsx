@@ -3,6 +3,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import React, { ComponentProps } from "react";
 
 import ChatScreen from "./screens/chat-screen";
+import CommunityScreen from "./screens/community-screen";
 import HomeScreen from "./screens/home-screen";
 import LoggerScreen from "./screens/logger-screen";
 import ProfileScreen from "./screens/profile-screen";
@@ -32,6 +33,8 @@ export default function App() {
             iconName = "dumbbell";
           } else if (route.name === "Logger") {
             iconName = "clipboard-text";
+          } else if (route.name === "Community") {
+            iconName = "chat";
           } else if (route.name === "Chat") {
             iconName = "robot";
           } else {
@@ -47,6 +50,7 @@ export default function App() {
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Workout" component={WorkoutScreen} />
       <Tab.Screen name="Logger" component={LoggerScreen} />
+      <Tab.Screen name="Community" component={CommunityScreen} />
       <Tab.Screen name="Chat" component={ChatScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
