@@ -74,7 +74,7 @@ export default function GlobalWorkoutsMaster() {
             auth.filledBtn,
             { backgroundColor: colors.blue, marginBottom: 20 },
           ]}
-          onPress={() => router.push("/screens/admin/add-global-workout")}
+          onPress={() => router.push("/screens/admin/add-global-workout" as any)}
         >
           <Text style={auth.filledBtnText}>+ CREATE NEW GLOBAL WORKOUT</Text>
         </TouchableOpacity>
@@ -94,7 +94,7 @@ export default function GlobalWorkoutsMaster() {
               color={colors.blue}
               onPress={() =>
                 router.push({
-                  pathname: "./admin/edit-global-workout",
+                  pathname: "/screens/admin/edit-global-workout" as any,
                   params: { workoutId: plan.id },
                 })
               }

@@ -55,6 +55,82 @@ export default function HomeScreen({ navigation }: any) {
     }
   }, [progressPercent, loading]);
 
+  /**
+   * Streak update logic:
+   * - If last workout was YESTERDAY  → increment streak
+   * - If last workout was TODAY       → do nothing (already counted)
+   * - If 2+ days ago OR no log        → reset to 0
+   */
+  async function checkAndUpdateStreak(userId: string) {
+    try {
+      const { data: lastLog } = await supabase
+        .from("workout_logs")
+        .select("completed_at")
+        .eq("user_id", userId)
+        .order("completed_at", { ascending: false })
+        .limit(1)
+        .single();
+
+      const { data: currentProfile } = await supabase
+        .from("profiles")
+        .select("streak")
+        .eq("id", userId)
+        .single();
+
+      const currentStreak = currentProfile?.streak ?? 0;
+
+      if (!lastLog) {
+        // No workouts ever — reset if somehow non-zero
+        if (currentStreak !== 0) {
+          await supabase
+            .from("profiles")
+            .update({ streak: 0 })
+            .eq("id", userId);
+        }
+        return 0;
+      }
+
+      const lastDate = new Date(lastLog.completed_at);
+      lastDate.setHours(0, 0, 0, 0);
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const yesterday = new Date(today);
+      yesterday.setDate(today.getDate() - 1);
+
+      const diffDays = Math.round(
+        (today.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24),
+      );
+
+      let newStreak = currentStreak;
+
+      if (diffDays === 0) {
+        // Worked out today — streak already counted, no change
+        return currentStreak;
+      } else if (diffDays === 1) {
+        // Worked out yesterday — extend streak
+        newStreak = currentStreak + 1;
+        await supabase
+          .from("profiles")
+          .update({ streak: newStreak })
+          .eq("id", userId);
+      } else {
+        // 2+ days ago — streak broken
+        newStreak = 0;
+        await supabase
+          .from("profiles")
+          .update({ streak: 0 })
+          .eq("id", userId);
+      }
+
+      return newStreak;
+    } catch (error) {
+      console.error("Streak check error:", error);
+      return 0;
+    }
+  }
+
   async function fetchProfile() {
     try {
       setLoading(true);
@@ -64,6 +140,9 @@ export default function HomeScreen({ navigation }: any) {
       const user = session?.user;
 
       if (!user) return;
+
+      // Update streak before reading profile
+      const updatedStreak = await checkAndUpdateStreak(user.id);
 
       // 1. Fetch Profile Info
       const { data: profileData } = await supabase
@@ -84,7 +163,8 @@ export default function HomeScreen({ navigation }: any) {
         .eq("user_id", user.id)
         .gte("created_at", todayStr);
 
-      const totalWater = waterData?.reduce((sum, item) => sum + item.amount_ml, 0) || 0;
+      const totalWater =
+        waterData?.reduce((sum, item) => sum + item.amount_ml, 0) || 0;
 
       // Calories
       const { data: nutritionData } = await supabase
@@ -93,7 +173,8 @@ export default function HomeScreen({ navigation }: any) {
         .eq("user_id", user.id)
         .gte("logged_at", todayStr);
 
-      const totalCalories = nutritionData?.reduce((sum, item) => sum + item.calories, 0) || 0;
+      const totalCalories =
+        nutritionData?.reduce((sum, item) => sum + item.calories, 0) || 0;
 
       // Workouts
       const { count: workoutCount } = await supabase
@@ -115,7 +196,7 @@ export default function HomeScreen({ navigation }: any) {
         username: profileData?.username || "CHAMPION",
         xp: profileData?.xp || 0,
         level: profileData?.level || 1,
-        streak: profileData?.streak || 0,
+        streak: profileData?.streak ?? updatedStreak,
         water: totalWater,
         calories: totalCalories,
         workouts: workoutCount || 0,

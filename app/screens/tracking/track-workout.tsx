@@ -35,15 +35,18 @@ interface Exercise {
 
 export default function TrackWorkout() {
   const router = useRouter();
-  const { planId, planName } = useLocalSearchParams<{
+  const { planId, planName, isGlobal } = useLocalSearchParams<{
     planId: string;
     planName: string;
+    isGlobal: string;
   }>();
+
+  const isGlobalWorkout = isGlobal === "true";
+
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
   const [isFinishing, setIsFinishing] = useState(false);
   const [startTime] = useState(new Date());
-
   const [historySets, setHistorySets] = useState<any[]>([]);
 
   useEffect(() => {
@@ -57,31 +60,51 @@ export default function TrackWorkout() {
   const initWorkout = async () => {
     setLoading(true);
     try {
-      const { data: planExData, error: planExError } = await supabase
-        .from("plan_exercises")
-        .select("*")
-        .eq("plan_id", planId)
-        .order("order_index", { ascending: true });
+      let planExData: any[] = [];
 
-      if (planExError) throw planExError;
+      if (isGlobalWorkout) {
+        // Fetch from global_workout_exercises
+        const { data, error } = await supabase
+          .from("global_workout_exercises")
+          .select("*")
+          .eq("workout_id", planId)
+          .order("order_index", { ascending: true });
 
-      const { data: lastLog } = await supabase
-        .from("workout_logs")
-        .select("id")
-        .eq("plan_id", planId)
-        .order("completed_at", { ascending: false })
-        .limit(1)
-        .single();
+        if (error) throw error;
+        planExData = data || [];
+      } else {
+        // Fetch from user plan_exercises
+        const { data, error } = await supabase
+          .from("plan_exercises")
+          .select("*")
+          .eq("plan_id", planId)
+          .order("order_index", { ascending: true });
+
+        if (error) throw error;
+        planExData = data || [];
+      }
 
       let prevSets: any[] = [];
-      if (lastLog) {
-        const { data: lastSets } = await supabase
-          .from("exercise_sets")
-          .select("exercise_name, weight, set_number")
-          .eq("workout_log_id", lastLog.id);
 
-        prevSets = lastSets || [];
-        setHistorySets(prevSets);
+      // Previous weight lookup only applies to user plans
+      if (!isGlobalWorkout) {
+        const { data: lastLog } = await supabase
+          .from("workout_logs")
+          .select("id")
+          .eq("plan_id", planId)
+          .order("completed_at", { ascending: false })
+          .limit(1)
+          .single();
+
+        if (lastLog) {
+          const { data: lastSets } = await supabase
+            .from("exercise_sets")
+            .select("exercise_name, weight, set_number")
+            .eq("workout_log_id", lastLog.id);
+
+          prevSets = lastSets || [];
+          setHistorySets(prevSets);
+        }
       }
 
       const formattedExercises = planExData.map((item: any) => {
@@ -101,7 +124,7 @@ export default function TrackWorkout() {
             isUnlocked: i === 0,
             prevWeight: matchingPrevSet
               ? matchingPrevSet.weight.toString()
-              : "–",
+              : "—",
           };
         });
 
@@ -141,7 +164,7 @@ export default function TrackWorkout() {
         .insert([
           {
             user_id: session.user.id,
-            plan_id: planId || null,
+            plan_id: isGlobalWorkout ? null : (planId || null),
             workout_name: planName || "Untitled Workout",
             duration_minutes: durationMinutes,
             completed_at: endTime.toISOString(),
@@ -160,7 +183,7 @@ export default function TrackWorkout() {
           weight: parseFloat(set.weight || "0"),
           reps: parseInt(set.reps || "0"),
           set_number: index + 1,
-          is_completed: true,
+          is_completed: set.checked,
         })),
       );
 
@@ -199,7 +222,7 @@ export default function TrackWorkout() {
             reps: "",
             checked: false,
             isUnlocked: true,
-            prevWeight: "–",
+            prevWeight: "—",
           },
         ],
       },
@@ -235,7 +258,7 @@ export default function TrackWorkout() {
                 isUnlocked: shouldBeUnlocked,
                 prevWeight: matchingPrevSet
                   ? matchingPrevSet.weight.toString()
-                  : "–",
+                  : "—",
               },
             ],
           };

@@ -41,7 +41,7 @@ function RootLayoutNav() {
   return (
     <Stack
       screenOptions={{ headerShown: false }}
-      initialRouteName="screens/admin/dashboard"
+      initialRouteName="index"
     >
       <Stack.Screen name="splash" />
       <Stack.Screen name="index" />
@@ -69,6 +69,7 @@ function RootLayoutNav() {
       <Stack.Screen name="screens/admin/add-global-workout" />
       <Stack.Screen name="screens/admin/edit-global-workout" />
       <Stack.Screen name="screens/admin/add-global-exercise" />
+      <Stack.Screen name="screens/admin/community-screen" />
     </Stack>
   );
 }

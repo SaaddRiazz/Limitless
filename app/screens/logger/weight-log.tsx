@@ -35,6 +35,7 @@ export default function WeightLog() {
 
       const user_id = session.user.id;
 
+      // Fetch the most recent biometric entry for pre-filling fields
       const { data: latest_data, error: latest_error } = await supabase
         .from("biometrics")
         .select("weight_kg, height_cm")
@@ -49,6 +50,7 @@ export default function WeightLog() {
         setHeight(latest_data[0].height_cm.toString());
       }
 
+      // Fetch last 15 entries for chart (ascending for chronological order)
       const { data: history_data, error: history_error } = await supabase
         .from("biometrics")
         .select("weight_kg, created_at")
@@ -102,16 +104,46 @@ export default function WeightLog() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
 
-      const { error } = await supabase
-        .from("biometrics")
-        .insert({
-          user_id: session.user.id,
-          weight_kg: parseFloat(weight),
-          height_cm: parseFloat(height),
-          bmi: parseFloat(bmiData.score),
-        });
+      const user_id = session.user.id;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayStr = today.toISOString();
+      const tomorrowStr = new Date(today.getTime() + 86400000).toISOString();
 
-      if (error) throw error;
+      // Check if an entry already exists for today
+      const { data: existing } = await supabase
+        .from("biometrics")
+        .select("id")
+        .eq("user_id", user_id)
+        .gte("created_at", todayStr)
+        .lt("created_at", tomorrowStr)
+        .limit(1);
+
+      if (existing && existing.length > 0) {
+        // Update today's existing row
+        const { error } = await supabase
+          .from("biometrics")
+          .update({
+            weight_kg: parseFloat(weight),
+            height_cm: parseFloat(height),
+            bmi: parseFloat(bmiData.score),
+          })
+          .eq("id", existing[0].id);
+
+        if (error) throw error;
+      } else {
+        // Insert a new row
+        const { error } = await supabase
+          .from("biometrics")
+          .insert({
+            user_id,
+            weight_kg: parseFloat(weight),
+            height_cm: parseFloat(height),
+            bmi: parseFloat(bmiData.score),
+          });
+
+        if (error) throw error;
+      }
 
       await addXP(XP_VALUES.WEIGHT_LOG);
       fetchInitialData();
@@ -142,7 +174,6 @@ export default function WeightLog() {
     fillShadowGradientTo: "#000",
     fillShadowGradientOpacity: 0.3,
     strokeWidth: 3,
-
     labelColor: (opacity = 1) => "#aaa",
     propsForBackgroundLines: { stroke: "#1a1a1a" },
   };

@@ -16,11 +16,14 @@ import {
 export default function WorkoutScreen() {
   const router = useRouter();
   const [savedPlans, setSavedPlans] = useState<any[]>([]);
+  const [globalWorkouts, setGlobalWorkouts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [globalLoading, setGlobalLoading] = useState(true);
 
   useFocusEffect(
     useCallback(() => {
       fetchPlans();
+      fetchGlobalWorkouts();
     }, []),
   );
 
@@ -44,6 +47,23 @@ export default function WorkoutScreen() {
       Alert.alert("Error", "Failed to load workout plans.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchGlobalWorkouts = async () => {
+    try {
+      setGlobalLoading(true);
+      const { data, error } = await supabase
+        .from("global_workouts")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setGlobalWorkouts(data || []);
+    } catch (error: any) {
+      console.error("Failed to load global workouts:", error);
+    } finally {
+      setGlobalLoading(false);
     }
   };
 
@@ -92,6 +112,7 @@ export default function WorkoutScreen() {
           <Text style={auth.filledBtnText}>ADD WORKOUT PLAN</Text>
         </TouchableOpacity>
 
+        {/* My Routines */}
         <Text
           style={[logger.sectionTitle, { marginTop: 30, marginBottom: 15 }]}
         >
@@ -102,10 +123,10 @@ export default function WorkoutScreen() {
           <ActivityIndicator
             size="large"
             color={colors.blue}
-            style={{ marginTop: 50 }}
+            style={{ marginTop: 20 }}
           />
         ) : savedPlans.length > 0 ? (
-          savedPlans.map((plan, index) => (
+          savedPlans.map((plan) => (
             <WorkoutPlanCard
               key={plan.id}
               title={plan.name}
@@ -121,9 +142,49 @@ export default function WorkoutScreen() {
             />
           ))
         ) : (
-          <View style={{ alignItems: "center", marginTop: 50 }}>
+          <View style={{ alignItems: "center", marginTop: 20 }}>
             <Text style={{ color: colors.textDark }}>
               No routines saved yet.
+            </Text>
+          </View>
+        )}
+
+        {/* Global Routines */}
+        <Text
+          style={[logger.sectionTitle, { marginTop: 35, marginBottom: 15 }]}
+        >
+          Global Routines
+        </Text>
+
+        {globalLoading ? (
+          <ActivityIndicator
+            size="large"
+            color={colors.orange}
+            style={{ marginTop: 20 }}
+          />
+        ) : globalWorkouts.length > 0 ? (
+          globalWorkouts.map((workout) => (
+            <WorkoutPlanCard
+              key={workout.id}
+              title={workout.name}
+              subtitle={workout.description || "Global routine"}
+              color={colors.orange}
+              onPress={() =>
+                router.push({
+                  pathname: "/screens/tracking/track-workout",
+                  params: {
+                    planId: workout.id,
+                    planName: workout.name,
+                    isGlobal: "true",
+                  },
+                })
+              }
+            />
+          ))
+        ) : (
+          <View style={{ alignItems: "center", marginTop: 20, marginBottom: 40 }}>
+            <Text style={{ color: colors.textDark }}>
+              No global routines available.
             </Text>
           </View>
         )}

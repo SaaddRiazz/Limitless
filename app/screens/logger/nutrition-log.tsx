@@ -61,7 +61,7 @@ export default function NutritionLog() {
         .from("nutrition_logs")
         .select("*")
         .eq("user_id", session.user.id)
-        .order("logged_at", { ascending: true });
+        .order("logged_at", { ascending: false });
 
       if (error) throw error;
 
@@ -77,11 +77,11 @@ export default function NutritionLog() {
             date,
             color:
               date ===
-              new Date().toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-              })
+                new Date().toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })
                 ? colors.green
                 : colors.blue,
             meals: {},
@@ -105,13 +105,15 @@ export default function NutritionLog() {
         return acc;
       }, {});
 
-      const formattedData = Object.values(grouped).map((day: any) => ({
-        ...day,
-        meals: Object.values(day.meals).map((m: any) => ({
-          ...m,
-          itemsList: m.items,
-        })),
-      }));
+      const formattedData = Object.values(grouped)
+        .reverse()
+        .map((day: any) => ({
+          ...day,
+          meals: Object.values(day.meals).map((m: any) => ({
+            ...m,
+            itemsList: m.items,
+          })),
+        }));
 
       setHistoryData(formattedData);
     } catch (error: any) {
@@ -129,13 +131,22 @@ export default function NutritionLog() {
 
     setIsEstimating(true);
     try {
-      const model = genAI.getGenerativeModel({
-        model: "gemini-3.1-flash-lite-preview",
-      });
-      const prompt = `Estimate the calories for: ${foodName} - ${description}. Return ONLY the integer number. If you cannot estimate, return 0.`;
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const text = response.text().trim();
+      const prompt = `Estimate the calories for: ${foodName} - ${description}. Return ONLY the integer number, no units or text. If you cannot estimate, return 0.`;
+
+      let text = "";
+      try {
+        // Primary model
+        const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
+        const result = await model.generateContent(prompt);
+        text = result.response.text().trim();
+      } catch {
+        // Fallback model (gemini-pro is deprecated; use 1.5-pro)
+        console.warn("Primary Gemini model failed, trying fallback...");
+        const fallback = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
+        const result = await fallback.generateContent(prompt);
+        text = result.response.text().trim();
+      }
+
       const calorieValue = parseInt(text.replace(/[^0-9]/g, "")) || 0;
       setCalories(calorieValue.toString());
     } catch (error) {

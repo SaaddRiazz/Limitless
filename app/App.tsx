@@ -34,7 +34,7 @@ export default function App() {
           } else if (route.name === "Logger") {
             iconName = "clipboard-text";
           } else if (route.name === "Community") {
-            iconName = "chat";
+            iconName = "account-group";
           } else if (route.name === "Chat") {
             iconName = "robot";
           } else {

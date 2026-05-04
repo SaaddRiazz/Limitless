@@ -34,17 +34,19 @@ export const WorkoutPlanCard = ({
         </View>
 
         <View style={styles.actions}>
-          <TouchableOpacity
-            onPress={onDelete}
-            style={styles.deleteBtn}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          >
-            <MaterialCommunityIcons
-              name="trash-can-outline"
-              size={20}
-              color={colors.red}
-            />
-          </TouchableOpacity>
+          {onDelete && (
+            <TouchableOpacity
+              onPress={onDelete}
+              style={styles.deleteBtn}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <MaterialCommunityIcons
+                name="trash-can-outline"
+                size={20}
+                color={colors.red}
+              />
+            </TouchableOpacity>
+          )}
           <MaterialCommunityIcons name="chevron-right" size={24} color="#555" />
         </View>
       </View>

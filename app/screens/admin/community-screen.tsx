@@ -8,6 +8,7 @@ import {
     ActivityIndicator,
     Alert,
     FlatList,
+    Image,
     StyleSheet,
     Text,
     TouchableOpacity,
@@ -58,6 +59,13 @@ export default function AdminCommunityScreen() {
         </TouchableOpacity>
       </View>
       <Text style={styles.postText}>{item.content}</Text>
+      {item.image_url ? (
+        <Image
+          source={{ uri: item.image_url }}
+          style={styles.postImage}
+          resizeMode="cover"
+        />
+      ) : null}
     </View>
   );
 
@@ -91,5 +99,11 @@ const styles = StyleSheet.create({
     borderLeftColor: colors.red,
   },
   username: { color: "#fff", fontWeight: "bold" },
-  postText: { color: "#888", marginTop: 5 },
+  postText: { color: "#888", marginTop: 5, marginBottom: 10 },
+  postImage: {
+    width: "100%",
+    height: 180,
+    borderRadius: 10,
+    marginTop: 5,
+  },
 });
