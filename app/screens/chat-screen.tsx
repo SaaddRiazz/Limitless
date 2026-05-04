@@ -72,7 +72,7 @@ export default function ChatScreen() {
         var response = await result.response;
       } catch (e: any) {
         console.warn("Falling back to gemini-pro due to error:", e.message);
-        model = genAI.getGenerativeModel({ model: "gemini-pro" });
+        model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
         const prompt = `${SYSTEM_INSTRUCTION}\n\nUser: ${inputText}`;
         const result = await model.generateContent(prompt);
         var response = await result.response;
