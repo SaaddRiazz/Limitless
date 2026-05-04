@@ -1,6 +1,7 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import React, { ComponentProps } from "react";
+import { useAuth } from "@/context/auth";
 
 import ChatScreen from "./screens/chat-screen";
 import CommunityScreen from "./screens/community-screen";
@@ -8,10 +9,13 @@ import HomeScreen from "./screens/home-screen";
 import LoggerScreen from "./screens/logger-screen";
 import ProfileScreen from "./screens/profile-screen";
 import WorkoutScreen from "./screens/workout-screen";
+import AdminDashboard from "./screens/admin/dashboard";
 
 const Tab = createBottomTabNavigator();
 
 export default function App() {
+  const { isAdmin } = useAuth();
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -25,7 +29,7 @@ export default function App() {
         tabBarActiveTintColor: "#2196F3",
         tabBarInactiveTintColor: "#808080",
         tabBarIcon: ({ color, size }) => {
-          let iconName: ComponentProps<typeof MaterialCommunityIcons>["name"];
+          let iconName: ComponentProps<typeof MaterialCommunityIcons>["name"] = "help";
 
           if (route.name === "Home") {
             iconName = "home-variant";
@@ -37,7 +41,9 @@ export default function App() {
             iconName = "account-group";
           } else if (route.name === "Chat") {
             iconName = "robot";
-          } else {
+          } else if (route.name === "Admin") {
+            iconName = "shield-account";
+          } else if (route.name === "Profile") {
             iconName = "account";
           }
 
@@ -52,6 +58,7 @@ export default function App() {
       <Tab.Screen name="Logger" component={LoggerScreen} />
       <Tab.Screen name="Community" component={CommunityScreen} />
       <Tab.Screen name="Chat" component={ChatScreen} />
+      {isAdmin && <Tab.Screen name="Admin" component={AdminDashboard} />}
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );
