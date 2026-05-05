@@ -14,20 +14,17 @@ import {
 
 export default function AddGlobalExercise() {
   const [name, setName] = useState("");
-  const [met, setMet] = useState("");
 
   const handleSave = async () => {
-    if (!name || !met) return Alert.alert("Error", "Fill all fields");
+    if (!name) return Alert.alert("Error", "Fill all fields");
     const { error } = await supabase.from("global_exercises").insert([
       {
         name,
-        met_value: parseFloat(met),
       },
     ]);
     if (!error) {
       Alert.alert("Success", "Exercise added to library");
       setName("");
-      setMet("");
     }
   };
 
@@ -44,20 +41,6 @@ export default function AddGlobalExercise() {
           placeholder="Bench Press"
           placeholderTextColor="#333"
         />
-
-        <Text style={styles.label}>MET VALUE (Metabolic Equivalent)</Text>
-        <TextInput
-          style={styles.input}
-          value={met}
-          onChangeText={setMet}
-          keyboardType="numeric"
-          placeholder="e.g. 6.0"
-          placeholderTextColor="#333"
-        />
-        <Text style={styles.hint}>
-          MET is used for calculating calories burned based on body weight and
-          duration.
-        </Text>
 
         <TouchableOpacity
           style={[auth.filledBtn, { backgroundColor: colors.green }]}
@@ -88,5 +71,4 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#222",
   },
-  hint: { color: "#666", fontSize: 12, marginBottom: 20 },
 });
