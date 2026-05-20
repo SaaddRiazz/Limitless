@@ -15,7 +15,7 @@ export const auth = StyleSheet.create({
     textAlign: "center",
     letterSpacing: 4,
     fontStyle: "italic",
-    textShadowColor: "rgba(255, 255, 255, 0.75)",
+    textShadowColor: "rgba(101, 204, 255, 0.75)",
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 30,
     transform: [{ scaleX: 1.35 }],

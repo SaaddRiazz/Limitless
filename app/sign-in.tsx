@@ -113,11 +113,6 @@ export default function SignIn() {
 }
 
 const localStyles = StyleSheet.create({
-  glowingLogo: {
-    textShadowColor: "rgba(33, 150, 243, 0.6)",
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 30,
-  },
   underline: {
     height: 2,
     width: 200,
