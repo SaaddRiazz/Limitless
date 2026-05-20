@@ -41,7 +41,7 @@ function RootLayoutNav() {
   return (
     <Stack
       screenOptions={{ headerShown: false }}
-      initialRouteName="index"
+      initialRouteName="splash"
     >
       <Stack.Screen name="splash" />
       <Stack.Screen name="index" />

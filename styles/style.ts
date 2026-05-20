@@ -19,6 +19,7 @@ export const auth = StyleSheet.create({
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 30,
     transform: [{ scaleX: 1.35 }],
+    width: '100%',
   },
   welcomeText: {
     fontSize: 16,
