@@ -16,7 +16,9 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  StyleSheet,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import { auth, main } from "../../styles/style";
 import { useRouter } from "expo-router";
 
@@ -212,18 +214,19 @@ export default function ProfileScreen() {
 
   if (loading && !username && !avatarUrl) {
     return (
-      <View style={[main.container, { justifyContent: "center" }]}>
+      <LinearGradient colors={["#020205", "#0a0a1a"]} style={[styles.container, { justifyContent: "center" }]}>
         <ActivityIndicator size="large" color="#2196F3" />
-      </View>
+      </LinearGradient>
     );
   }
 
   return (
-    <View style={main.container}>
-      <Text style={[main.headerTitle, { marginBottom: 30, marginTop: 20 }]}>
-        PROFILE
-      </Text>
-      <ScrollView>
+    <LinearGradient colors={["#020205", "#0a0a1a"]} style={styles.container}>
+      <View>
+        <Text style={[auth.title, { marginBottom: 15 }]}>PROFILE</Text>
+      </View>
+      <View style={styles.fullLine} />
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Avatar Section */}
         <View style={{ alignItems: "center", marginBottom: 30 }}>
           <TouchableOpacity onPress={pickImage} disabled={uploading}>
@@ -232,12 +235,16 @@ export default function ProfileScreen() {
                 width: 120,
                 height: 120,
                 borderRadius: 60,
-                backgroundColor: "#2e2e2e",
+                backgroundColor: "#161622",
                 justifyContent: "center",
                 alignItems: "center",
                 borderWidth: 2,
                 borderColor: "#2196F3",
                 overflow: "hidden",
+                shadowColor: "#2196F3",
+                shadowOffset: { width: 0, height: 0 },
+                shadowOpacity: 0.3,
+                shadowRadius: 10,
               }}
             >
               {uploading ? (
@@ -256,44 +263,44 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* XP Card - Matched with Dashboard */}
-        <View style={main.levelContainer}>
-          <View
-            style={{ flexDirection: "row", justifyContent: "space-between" }}
+        {/* Upgraded Level/XP card */}
+        <View style={{ borderRadius: 20, borderWidth: 1, borderColor: "rgba(33, 150, 243, 0.3)", overflow: "hidden", marginBottom: 30 }}>
+          <LinearGradient
+            colors={["rgba(33, 150, 243, 0.15)", "rgba(0, 0, 0, 0.8)"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={{ padding: 25 }}
           >
-            <Text style={{ color: "#fff", fontWeight: "bold" }}>
-              Level {level}
-            </Text>
-            <Text style={{ color: "#2196F3", fontWeight: "bold" }}>
-              {xp.toLocaleString()} / {nextLevelXP.toLocaleString()} XP
-            </Text>
-          </View>
-
-          <View style={main.progressBarBg}>
-            <Animated.View
-              style={[
-                main.progressBarFill,
-                {
-                  width: animatedWidth.interpolate({
-                    inputRange: [0, 100],
-                    outputRange: ["0%", "100%"],
-                  }),
-                },
-              ]}
-            />
-          </View>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 15 }}>
+              <Text style={{ color: "#fff", fontWeight: "900", fontSize: 18, letterSpacing: 1 }}>LEVEL {level}</Text>
+              <Text style={{ color: "#2196F3", fontWeight: "bold", fontSize: 14 }}>{xp.toLocaleString()} / {nextLevelXP.toLocaleString()} XP</Text>
+            </View>
+            <View style={{ height: 8, backgroundColor: "rgba(0,0,0,0.5)", borderRadius: 4, overflow: "hidden", borderWidth: 1, borderColor: "rgba(255,255,255,0.1)" }}>
+              <Animated.View
+                style={[
+                  { height: "100%", backgroundColor: "#2196F3", borderRadius: 4 },
+                  {
+                    width: animatedWidth.interpolate({
+                      inputRange: [0, 100],
+                      outputRange: ["0%", "100%"],
+                    }),
+                  },
+                ]}
+              />
+            </View>
+          </LinearGradient>
         </View>
 
         {/* Username Section */}
-        <View style={{ gap: 10, marginBottom: 20 }}>
-          <Text style={{ color: "#b3b3b3", marginLeft: 5 }}>Username</Text>
+        <View style={{ gap: 10, marginBottom: 25 }}>
+          <Text style={{ color: "rgba(255,255,255,0.5)", fontSize: 13, fontWeight: "700", marginLeft: 5, letterSpacing: 1 }}>USERNAME</Text>
           <View style={auth.inputContainer}>
             <TextInput
               style={auth.input}
               value={username}
               onChangeText={setUsername}
               placeholder="Set your username"
-              placeholderTextColor="#999"
+              placeholderTextColor="#666"
             />
           </View>
         </View>
@@ -336,6 +343,23 @@ export default function ProfileScreen() {
           <Text style={auth.filledBtnText}>LOGOUT</Text>
         </TouchableOpacity>
       </ScrollView>
-    </View>
+    </LinearGradient>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingTop: 50,
+  },
+  fullLine: {
+    height: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    width: "100%",
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+    paddingTop: 20,
+  },
+});

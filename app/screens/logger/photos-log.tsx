@@ -18,11 +18,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { logger, main } from "../../../styles/style";
+import { auth, logger, main } from "../../../styles/style";
+import { LinearGradient } from "expo-linear-gradient";
 
 const { width } = Dimensions.get("window");
 const COLUMN_COUNT = 3;
-const SPACING = 10;
+const SPACING = 12;
 const ITEM_SIZE = (width - 40 - (COLUMN_COUNT - 1) * SPACING) / COLUMN_COUNT;
 
 interface ProgressPhoto {
@@ -182,30 +183,16 @@ export default function PhotosLog() {
   const currentPhoto = photos[0];
 
   return (
-    <View style={main.container}>
-      <BackButton color={colors.purple} />
-      <Text style={[logger.sectionTitle, { marginTop: 10 }]}>
-        Gains Gallery
-      </Text>
+    <LinearGradient colors={["#020205", "#0a0a1a"]} style={styles.container}>
+      <View style={{ paddingHorizontal: 20, marginBottom: 10 }}>
+        <BackButton color={colors.purple} />
+        <Text style={[auth.title, { paddingStart: 0, marginTop: 10, marginBottom: 15 }]}>
+          GAINS GALLERY
+        </Text>
+      </View>
+      <View style={styles.fullLine} />
 
-      <TouchableOpacity
-        onPress={handleAddPhoto}
-        disabled={uploading}
-        style={[styles.addSlot, uploading && { opacity: 0.5 }]}
-      >
-        {uploading ? (
-          <ActivityIndicator color="#a29bfe" />
-        ) : (
-          <>
-            <MaterialCommunityIcons
-              name="camera-plus"
-              size={32}
-              color="#a29bfe"
-            />
-            <Text style={styles.addText}>NEW ENTRY</Text>
-          </>
-        )}
-      </TouchableOpacity>
+      <View style={styles.headerSpacer} />
 
       {loading ? (
         <View style={styles.center}>
@@ -220,21 +207,53 @@ export default function PhotosLog() {
           contentContainerStyle={styles.listContent}
           columnWrapperStyle={styles.columnWrapper}
           showsVerticalScrollIndicator={false}
+          ListHeaderComponent={
+            <TouchableOpacity
+              activeOpacity={0.9}
+              onPress={handleAddPhoto}
+              disabled={uploading}
+              style={styles.addBtnWrapper}
+            >
+              <LinearGradient
+                colors={["#a29bfe", "#6c5ce7"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.addBtn}
+              >
+                {uploading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <>
+                    <MaterialCommunityIcons name="camera-plus" size={24} color="#fff" />
+                    <Text style={styles.addBtnText}>ADD PROGRESS PHOTO</Text>
+                  </>
+                )}
+              </LinearGradient>
+            </TouchableOpacity>
+          }
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>No progress photos added yet.</Text>
+            </View>
+          }
         />
       )}
 
-      {!loading && (
-        <View style={{ paddingVertical: 20 }}>
+      {!loading && photos.length >= 2 && (
+        <View style={styles.footer}>
           <TouchableOpacity
-            style={[
-              logger.submitBtn,
-              { backgroundColor: "#a29bfe" },
-              photos.length < 2 && { opacity: 0.5 },
-            ]}
+            activeOpacity={0.9}
+            style={styles.compareBtnWrapper}
             onPress={() => setCompareModalVisible(true)}
-            disabled={photos.length < 2}
           >
-            <Text style={logger.submitBtnText}>COMPARE PROGRESS</Text>
+            <LinearGradient
+              colors={["#a29bfe", "#6c5ce7"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.compareBtn}
+            >
+              <Text style={styles.compareBtnText}>COMPARE PROGRESS</Text>
+            </LinearGradient>
           </TouchableOpacity>
         </View>
       )}
@@ -248,7 +267,7 @@ export default function PhotosLog() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Transformation</Text>
+              <Text style={styles.modalTitle}>TRANSFORMATION</Text>
               <TouchableOpacity onPress={() => setCompareModalVisible(false)}>
                 <MaterialCommunityIcons name="close" size={24} color="#fff" />
               </TouchableOpacity>
@@ -288,13 +307,27 @@ export default function PhotosLog() {
           </View>
         </View>
       </Modal>
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingTop: 50,
+  },
+  fullLine: {
+    height: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    width: "100%",
+  },
+  headerSpacer: {
+    height: 10,
+  },
   listContent: {
-    paddingBottom: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+    paddingTop: 10,
   },
   columnWrapper: {
     gap: SPACING,
@@ -303,8 +336,10 @@ const styles = StyleSheet.create({
   photoContainer: {
     width: ITEM_SIZE,
     height: ITEM_SIZE,
-    borderRadius: 12,
-    backgroundColor: "#1a1a1a",
+    borderRadius: 15,
+    backgroundColor: "rgba(255, 255, 255, 0.02)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.05)",
     overflow: "hidden",
   },
   photo: {
@@ -312,23 +347,31 @@ const styles = StyleSheet.create({
     height: "100%",
     resizeMode: "cover",
   },
-  addSlot: {
-    width: "100%",
-    height: ITEM_SIZE,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderStyle: "dashed",
-    borderColor: "#a29bfe50",
-    backgroundColor: "rgba(162, 155, 254, 0.05)",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: SPACING,
+  addBtnWrapper: {
+    borderRadius: 15,
+    shadowColor: "#a29bfe",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 6,
+    marginBottom: 20,
+    marginTop: 10,
   },
-  addText: {
-    color: "#a29bfe",
-    fontSize: 10,
-    fontWeight: "bold",
-    marginTop: 8,
+  addBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 16,
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
+    gap: 8,
+  },
+  addBtnText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "900",
+    letterSpacing: 1,
   },
   center: {
     flex: 1,
@@ -337,18 +380,18 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.9)",
+    backgroundColor: "rgba(0,0,0,0.92)",
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
   },
   modalContent: {
     width: "100%",
-    backgroundColor: "#00000a",
+    backgroundColor: "#0a0a14",
     borderRadius: 25,
     padding: 20,
     borderWidth: 1,
-    borderColor: "#333",
+    borderColor: "rgba(255, 255, 255, 0.08)",
   },
   modalHeader: {
     flexDirection: "row",
@@ -375,8 +418,10 @@ const styles = StyleSheet.create({
     width: "100%",
     aspectRatio: 0.75,
     borderRadius: 15,
-    backgroundColor: "#1a1a1a",
+    backgroundColor: "#161622",
     overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.08)",
   },
   compareImage: {
     width: "100%",
@@ -389,10 +434,55 @@ const styles = StyleSheet.create({
     marginTop: 12,
     fontSize: 12,
     letterSpacing: 2,
+    fontStyle: "italic",
   },
   dateLabel: {
-    color: "#666",
-    fontSize: 10,
+    color: "rgba(255, 255, 255, 0.4)",
+    fontSize: 11,
     marginTop: 4,
+    fontWeight: "600",
+  },
+  emptyContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 50,
+    backgroundColor: "rgba(255, 255, 255, 0.01)",
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.03)",
+    borderStyle: "dashed",
+    marginTop: 20,
+  },
+  emptyText: {
+    color: "rgba(255, 255, 255, 0.3)",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  footer: {
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    backgroundColor: "transparent",
+  },
+  compareBtnWrapper: {
+    borderRadius: 15,
+    shadowColor: "#a29bfe",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 6,
+  },
+  compareBtn: {
+    height: 55,
+    borderRadius: 15,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
+  },
+  compareBtnText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "900",
+    letterSpacing: 1,
   },
 });

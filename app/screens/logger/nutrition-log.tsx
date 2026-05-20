@@ -19,6 +19,7 @@ import {
 } from "react-native";
 import { BackButton } from "../../../components/ui/back-button";
 import { auth, logger, main } from "../../../styles/style";
+import { LinearGradient } from "expo-linear-gradient";
 
 const genAI = new GoogleGenerativeAI(
   process.env.EXPO_PUBLIC_GEMINI_API_KEY || "",
@@ -135,12 +136,10 @@ export default function NutritionLog() {
 
       let text = "";
       try {
-        // Primary model
         const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
         const result = await model.generateContent(prompt);
         text = result.response.text().trim();
       } catch {
-        // Fallback model (gemini-pro is deprecated; use 1.5-pro)
         console.warn("Primary Gemini model failed, trying fallback...");
         const fallback = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
         const result = await fallback.generateContent(prompt);
@@ -206,54 +205,63 @@ export default function NutritionLog() {
   };
 
   return (
-    <View style={main.container}>
-      <BackButton color={colors.green} />
-
-      <View style={{ zIndex: 2000 }}>
-        <Text style={logger.sectionTitle}>Nutrition Log</Text>
-        <TouchableOpacity
-          style={[
-            auth.filledBtn,
-            { marginTop: 0, backgroundColor: colors.green },
-          ]}
-          onPress={() => setShowDropdown(!showDropdown)}
-        >
-          <Text style={auth.filledBtnText}>Track Calories</Text>
-        </TouchableOpacity>
-
-        {showDropdown && (
-          <View style={styles.dropdown}>
-            {mealTypes.map((meal) => (
-              <TouchableOpacity
-                key={meal.id}
-                style={styles.dropdownItem}
-                onPress={() => {
-                  setShowDropdown(false);
-                  setSelectedMealType(meal.name);
-                  setModalVisible(true);
-                }}
-              >
-                <Text style={{ color: "#fff", fontWeight: "600" }}>
-                  {meal.name}
-                </Text>
-                <MaterialCommunityIcons
-                  name="chevron-right"
-                  size={20}
-                  color="#555"
-                />
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
+    <LinearGradient colors={["#020205", "#0a0a1a"]} style={styles.container}>
+      <View style={{ paddingHorizontal: 20, marginBottom: 10 }}>
+        <BackButton color={colors.green} />
+        <Text style={[auth.title, { paddingStart: 0, marginTop: 10, marginBottom: 15 }]}>
+          NUTRITION LOG
+        </Text>
       </View>
+      <View style={styles.fullLine} />
 
       <ScrollView
-        contentContainerStyle={{ paddingBottom: 30 }}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={[logger.sectionTitle, { marginTop: 40 }]}>
-          Recent History
-        </Text>
+        <View style={{ zIndex: 2000, position: "relative", marginBottom: 20 }}>
+          <TouchableOpacity
+            activeOpacity={0.9}
+            onPress={() => setShowDropdown(!showDropdown)}
+            style={styles.trackBtnWrapper}
+          >
+            <LinearGradient
+              colors={["#4ec42a", "#256214"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.trackBtn}
+            >
+              <MaterialCommunityIcons name="food-apple" size={24} color="#fff" />
+              <Text style={styles.trackBtnText}>TRACK CALORIES</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+
+          {showDropdown && (
+            <View style={styles.dropdown}>
+              {mealTypes.map((meal) => (
+                <TouchableOpacity
+                  key={meal.id}
+                  style={styles.dropdownItem}
+                  onPress={() => {
+                    setShowDropdown(false);
+                    setSelectedMealType(meal.name);
+                    setModalVisible(true);
+                  }}
+                >
+                  <Text style={{ color: "#fff", fontWeight: "600" }}>
+                    {meal.name}
+                  </Text>
+                  <MaterialCommunityIcons
+                    name="chevron-right"
+                    size={20}
+                    color="rgba(255, 255, 255, 0.3)"
+                  />
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+        </View>
+
+        <Text style={styles.sectionTitle}>RECENT HISTORY</Text>
 
         {loading ? (
           <ActivityIndicator
@@ -271,15 +279,9 @@ export default function NutritionLog() {
             />
           ))
         ) : (
-          <Text
-            style={{
-              color: colors.textMuted,
-              textAlign: "center",
-              marginTop: 20,
-            }}
-          >
-            No nutrition logs found. Start tracking today!
-          </Text>
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>No nutrition logs found. Start tracking today!</Text>
+          </View>
         )}
       </ScrollView>
 
@@ -292,18 +294,18 @@ export default function NutritionLog() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Log {selectedMealType}</Text>
+              <Text style={styles.modalTitle}>LOG {selectedMealType.toUpperCase()}</Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
                 <MaterialCommunityIcons name="close" size={24} color="#fff" />
               </TouchableOpacity>
             </View>
 
-            <View style={styles.modalBody}>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.modalBody}>
               <Text style={styles.inputLabel}>Food Name</Text>
               <TextInput
                 style={styles.input}
                 placeholder="e.g. Grilled Chicken Breast"
-                placeholderTextColor="#444"
+                placeholderTextColor="rgba(255, 255, 255, 0.3)"
                 value={foodName}
                 onChangeText={setFoodName}
               />
@@ -312,7 +314,7 @@ export default function NutritionLog() {
               <TextInput
                 style={styles.input}
                 placeholder="e.g. 200g, 1 plate"
-                placeholderTextColor="#444"
+                placeholderTextColor="rgba(255, 255, 255, 0.3)"
                 value={description}
                 onChangeText={setDescription}
               />
@@ -322,7 +324,7 @@ export default function NutritionLog() {
                 <TextInput
                   style={[styles.input, { flex: 1, marginBottom: 0 }]}
                   placeholder="0"
-                  placeholderTextColor="#444"
+                  placeholderTextColor="rgba(255, 255, 255, 0.3)"
                   keyboardType="numeric"
                   value={calories}
                   onChangeText={setCalories}
@@ -337,7 +339,7 @@ export default function NutritionLog() {
                   ) : (
                     <MaterialCommunityIcons
                       name="robot"
-                      size={24}
+                      size={22}
                       color="#fff"
                     />
                   )}
@@ -345,33 +347,79 @@ export default function NutritionLog() {
               </View>
 
               <TouchableOpacity
-                style={[styles.saveButton, isSaving && { opacity: 0.7 }]}
+                activeOpacity={0.9}
+                style={[styles.saveBtnWrapper, isSaving && { opacity: 0.7 }]}
                 onPress={saveLog}
                 disabled={isSaving}
               >
-                {isSaving ? (
-                  <ActivityIndicator color="#000" />
-                ) : (
-                  <Text style={styles.saveButtonText}>SAVE ENTRY</Text>
-                )}
+                <LinearGradient
+                  colors={["#4ec42a", "#256214"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.saveBtn}
+                >
+                  {isSaving ? (
+                    <ActivityIndicator color="#fff" />
+                  ) : (
+                    <Text style={styles.saveBtnText}>SAVE ENTRY</Text>
+                  )}
+                </LinearGradient>
               </TouchableOpacity>
-            </View>
+            </ScrollView>
           </View>
         </View>
       </Modal>
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  dropdown: {
-    backgroundColor: "#111",
-    borderRadius: 8,
+  container: {
+    flex: 1,
+    paddingTop: 50,
+  },
+  fullLine: {
+    height: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    width: "100%",
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+    paddingTop: 20,
+  },
+  trackBtnWrapper: {
+    borderRadius: 15,
+    shadowColor: colors.green,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 6,
+  },
+  trackBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 16,
+    borderRadius: 15,
     borderWidth: 1,
-    borderColor: "#222",
+    borderColor: "rgba(255, 255, 255, 0.1)",
+    gap: 8,
+  },
+  trackBtnText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "900",
+    letterSpacing: 1,
+  },
+  dropdown: {
+    backgroundColor: "#0a0a14",
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.08)",
     overflow: "hidden",
     position: "absolute",
-    top: 85,
+    top: 60,
     width: "100%",
     zIndex: 2000,
     shadowColor: "#000",
@@ -383,55 +431,83 @@ const styles = StyleSheet.create({
   dropdownItem: {
     padding: 15,
     borderBottomWidth: 1,
-    borderBottomColor: "#222",
+    borderBottomColor: "rgba(255, 255, 255, 0.05)",
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
   },
+  sectionTitle: {
+    color: "rgba(255, 255, 255, 0.4)",
+    fontSize: 12,
+    fontWeight: "800",
+    letterSpacing: 2,
+    marginBottom: 15,
+    marginTop: 20,
+    marginLeft: 5,
+  },
+  emptyContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 40,
+    backgroundColor: "rgba(255, 255, 255, 0.01)",
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.03)",
+    borderStyle: "dashed",
+    marginTop: 10,
+  },
+  emptyText: {
+    color: "rgba(255, 255, 255, 0.3)",
+    fontSize: 14,
+    fontWeight: "600",
+    textAlign: "center",
+  },
+  // Modal
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.8)",
+    backgroundColor: "rgba(0,0,0,0.85)",
     justifyContent: "flex-end",
   },
   modalContent: {
-    backgroundColor: "#0a0a0a",
+    backgroundColor: "#0a0a14",
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
     padding: 20,
     borderTopWidth: 1,
-    borderTopColor: "#222",
-    minHeight: "60%",
+    borderTopColor: "rgba(255, 255, 255, 0.05)",
+    maxHeight: "85%",
   },
   modalHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 30,
+    marginBottom: 20,
   },
   modalTitle: {
     color: "#fff",
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "900",
     letterSpacing: 1,
+    fontStyle: "italic",
   },
   modalBody: {
     gap: 15,
+    paddingBottom: 30,
   },
   inputLabel: {
     color: colors.green,
-    fontSize: 12,
-    fontWeight: "bold",
-    letterSpacing: 1,
-    textTransform: "uppercase",
+    fontSize: 11,
+    fontWeight: "900",
+    letterSpacing: 1.5,
   },
   input: {
-    backgroundColor: "#111",
-    borderRadius: 12,
+    backgroundColor: "#161622",
+    borderRadius: 15,
     borderWidth: 1,
-    borderColor: "#222",
+    borderColor: "rgba(255, 255, 255, 0.05)",
     padding: 15,
     color: "#fff",
-    fontSize: 16,
-    marginBottom: 5,
+    fontSize: 15,
   },
   calorieInputRow: {
     flexDirection: "row",
@@ -439,31 +515,35 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   aiButton: {
-    backgroundColor: `${colors.blue}20`,
-    borderColor: colors.blue,
+    backgroundColor: "rgba(0, 122, 255, 0.1)",
+    borderColor: "rgba(0, 122, 255, 0.3)",
     borderWidth: 1,
-    width: 55,
-    height: 55,
-    borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  saveButton: {
-    backgroundColor: colors.green,
-    height: 60,
+    width: 50,
+    height: 50,
     borderRadius: 15,
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 20,
+  },
+  saveBtnWrapper: {
+    borderRadius: 15,
     shadowColor: colors.green,
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.3,
     shadowRadius: 10,
-    elevation: 5,
+    elevation: 6,
+    marginTop: 20,
   },
-  saveButtonText: {
-    color: "#000",
-    fontSize: 18,
+  saveBtn: {
+    height: 55,
+    borderRadius: 15,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
+  },
+  saveBtnText: {
+    color: "#fff",
+    fontSize: 16,
     fontWeight: "900",
     letterSpacing: 1,
   },

@@ -1,9 +1,10 @@
 import { supabase } from "@/lib/supabase";
 import { colors } from "@/styles/colors";
-import { auth, main } from "@/styles/style";
+import { auth } from "@/styles/style";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import React, { useCallback, useEffect, useState } from "react";
+import { LinearGradient } from "expo-linear-gradient";
+import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -142,7 +143,7 @@ export default function CommunityScreen() {
             image_url: imageUrl,
           })
           .eq("id", editingPostId);
-        
+
         if (error) throw error;
       } else {
         const { error } = await supabase.from("community_posts").insert([
@@ -206,12 +207,12 @@ export default function CommunityScreen() {
       prev.map((p) =>
         p.id === post.id
           ? {
-              ...p,
-              liked: !p.liked,
-              likes_count: p.liked ? p.likes_count - 1 : p.likes_count + 1,
-            }
+            ...p,
+            liked: !p.liked,
+            likes_count: p.liked ? p.likes_count - 1 : p.likes_count + 1,
+          }
           : p,
-      ),
+      )
     );
 
     if (post.liked) {
@@ -240,7 +241,7 @@ export default function CommunityScreen() {
   const renderPost = ({ item }: { item: Post }) => (
     <View style={styles.postCard}>
       <View style={styles.postHeader}>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
           {item.profiles?.avatar_url ? (
             <Image
               source={{ uri: item.profiles.avatar_url }}
@@ -265,10 +266,10 @@ export default function CommunityScreen() {
         </View>
 
         {/* Action Buttons */}
-        <View style={{ flexDirection: "row", gap: 12 }}>
+        <View style={{ flexDirection: "row", gap: 15 }}>
           {(item.user_id === userId || isAdmin) && (
             <TouchableOpacity onPress={() => startEdit(item)}>
-              <MaterialCommunityIcons name="pencil" size={20} color="#888" />
+              <MaterialCommunityIcons name="pencil" size={20} color="rgba(255, 255, 255, 0.4)" />
             </TouchableOpacity>
           )}
           {(item.user_id === userId || isAdmin) && (
@@ -297,7 +298,7 @@ export default function CommunityScreen() {
           <MaterialCommunityIcons
             name={item.liked ? "heart" : "heart-outline"}
             size={20}
-            color={item.liked ? colors.red : colors.red}
+            color={colors.red}
           />
           <Text
             style={[
@@ -313,24 +314,26 @@ export default function CommunityScreen() {
   );
 
   return (
-    <View style={main.container}>
+    <LinearGradient colors={["#020205", "#0a0a1a"]} style={styles.container}>
       <View
         style={{
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: 20,
-          marginTop: 10,
+          marginBottom: 15,
+          paddingRight: 20,
         }}
       >
-        <Text style={[main.headerTitle, { marginBottom: 0 }]}>COMMUNITY</Text>
+        <Text style={[auth.title, { marginBottom: 0 }]}>COMMUNITY</Text>
         <TouchableOpacity
+          activeOpacity={0.8}
           style={styles.composeBtn}
           onPress={() => setModalVisible(true)}
         >
           <MaterialCommunityIcons name="plus" size={22} color="#fff" />
         </TouchableOpacity>
       </View>
+      <View style={styles.fullLine} />
 
       {loading ? (
         <ActivityIndicator color={colors.blue} style={{ marginTop: 50 }} />
@@ -339,17 +342,12 @@ export default function CommunityScreen() {
           data={posts}
           renderItem={renderPost}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={{ paddingBottom: 30 }}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
           ListEmptyComponent={
-            <Text
-              style={{
-                color: colors.textMuted,
-                textAlign: "center",
-                marginTop: 50,
-              }}
-            >
-              No posts yet. Be the first to share!
-            </Text>
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>No posts yet. Be the first to share!</Text>
+            </View>
           }
         />
       )}
@@ -364,7 +362,7 @@ export default function CommunityScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{editingPostId ? "Edit Post" : "New Post"}</Text>
+              <Text style={styles.modalTitle}>{editingPostId ? "EDIT POST" : "NEW POST"}</Text>
               <TouchableOpacity onPress={closeModal}>
                 <MaterialCommunityIcons name="close" size={24} color="#fff" />
               </TouchableOpacity>
@@ -373,7 +371,7 @@ export default function CommunityScreen() {
             <TextInput
               style={styles.textArea}
               placeholder="Share your progress, tips or motivation..."
-              placeholderTextColor="#444"
+              placeholderTextColor="#555"
               value={postText}
               onChangeText={setPostText}
               multiline
@@ -409,7 +407,7 @@ export default function CommunityScreen() {
                   size={20}
                   color={colors.blue}
                 />
-                <Text style={{ color: colors.blue, marginLeft: 8 }}>
+                <Text style={{ color: colors.blue, marginLeft: 8, fontWeight: "700" }}>
                   Attach Image
                 </Text>
               </TouchableOpacity>
@@ -433,63 +431,88 @@ export default function CommunityScreen() {
           </View>
         </View>
       </Modal>
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingTop: 50,
+  },
+  fullLine: {
+    height: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    width: "100%",
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+    paddingTop: 20,
+  },
   composeBtn: {
-    backgroundColor: colors.blue,
+    backgroundColor: "#007AFF",
     width: 40,
     height: 40,
     borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
+    shadowColor: "#007AFF",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 6,
+    elevation: 4,
   },
   postCard: {
-    backgroundColor: "#111",
-    borderRadius: 15,
-    padding: 15,
-    marginBottom: 15,
+    backgroundColor: "rgba(255, 255, 255, 0.03)",
+    borderColor: "rgba(255, 255, 255, 0.05)",
     borderWidth: 1,
-    borderColor: "#222",
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 16,
   },
   postHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 10,
+    marginBottom: 15,
   },
   avatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
   },
   avatarPlaceholder: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#222",
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#161622",
     justifyContent: "center",
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
   },
-  username: { color: "#fff", fontWeight: "bold", fontSize: 15 },
-  timestamp: { color: "#555", fontSize: 11, marginTop: 1 },
-  postText: { color: "#ccc", fontSize: 14, lineHeight: 20, marginBottom: 10 },
+  username: { color: "#fff", fontWeight: "900", fontSize: 16 },
+  timestamp: { color: "rgba(255, 255, 255, 0.4)", fontSize: 11, marginTop: 1, fontWeight: "600" },
+  postText: { color: "rgba(255, 255, 255, 0.8)", fontSize: 14, lineHeight: 22, marginBottom: 15 },
   postImage: {
     width: "100%",
-    height: 200,
-    borderRadius: 10,
-    marginBottom: 10,
+    height: 220,
+    borderRadius: 15,
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.05)",
   },
   postFooter: {
     marginTop: 5,
     borderTopWidth: 1,
-    borderTopColor: "#222",
-    paddingTop: 10,
+    borderTopColor: "rgba(255, 255, 255, 0.05)",
+    paddingTop: 12,
   },
-  interactionBtn: { flexDirection: "row", alignItems: "center", gap: 6 },
-  interactionText: { color: "#666", fontSize: 13 },
+  interactionBtn: { flexDirection: "row", alignItems: "center", gap: 8 },
+  interactionText: { color: "rgba(255, 255, 255, 0.5)", fontSize: 13, fontWeight: "700" },
   // Modal
   modalOverlay: {
     flex: 1,
@@ -497,12 +520,12 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   modalContent: {
-    backgroundColor: "#0a0a0a",
+    backgroundColor: "#0a0a14",
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
     padding: 20,
     borderTopWidth: 1,
-    borderTopColor: "#222",
+    borderTopColor: "rgba(255,255,255,0.05)",
     minHeight: "60%",
   },
   modalHeader: {
@@ -513,15 +536,16 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     color: "#fff",
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: "900",
     letterSpacing: 1,
+    fontStyle: "italic",
   },
   textArea: {
-    backgroundColor: "#111",
-    borderRadius: 12,
+    backgroundColor: "#161622",
+    borderRadius: 15,
     borderWidth: 1,
-    borderColor: "#222",
+    borderColor: "rgba(255, 255, 255, 0.05)",
     padding: 15,
     color: "#fff",
     fontSize: 15,
@@ -532,8 +556,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: `${colors.blue}60`,
-    borderRadius: 10,
+    borderColor: `${colors.blue}40`,
+    borderRadius: 15,
     padding: 12,
     backgroundColor: `${colors.blue}10`,
     marginBottom: 5,
@@ -542,7 +566,7 @@ const styles = StyleSheet.create({
   imagePreview: {
     width: "100%",
     height: 160,
-    borderRadius: 12,
+    borderRadius: 15,
   },
   removeImageBtn: {
     position: "absolute",
@@ -550,5 +574,21 @@ const styles = StyleSheet.create({
     right: 8,
     backgroundColor: "rgba(0,0,0,0.6)",
     borderRadius: 11,
+  },
+  emptyContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 40,
+    backgroundColor: "rgba(255, 255, 255, 0.01)",
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.03)",
+    borderStyle: "dashed",
+    marginTop: 20,
+  },
+  emptyText: {
+    color: "rgba(255, 255, 255, 0.3)",
+    fontSize: 14,
+    fontWeight: "600",
   },
 });

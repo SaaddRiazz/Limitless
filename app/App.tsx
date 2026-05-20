@@ -21,13 +21,13 @@ export default function App() {
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: "#00000a",
-          borderTopColor: "#2e2e2e",
+          backgroundColor: "#0a0a1a",
+          borderTopColor: "rgba(255, 255, 255, 0.08)",
           height: 65,
           paddingBottom: 10,
         },
         tabBarActiveTintColor: "#2196F3",
-        tabBarInactiveTintColor: "#808080",
+        tabBarInactiveTintColor: "rgba(255, 255, 255, 0.4)",
         tabBarIcon: ({ color, size }) => {
           let iconName: ComponentProps<typeof MaterialCommunityIcons>["name"] = "help";
 
