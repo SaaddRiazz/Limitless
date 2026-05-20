@@ -36,7 +36,7 @@ export default function SignIn() {
   };
 
   return (
-    <LinearGradient colors={["#050511", "#000000"]} style={auth.innerContainer}>
+    <LinearGradient colors={["#020205", "#0a0a1a"]} style={auth.innerContainer}>
       <View style={{ alignItems: "center", marginBottom: 40, marginTop: 30 }}>
         <Text style={[auth.logo]}>LIMITLESS</Text>
         <View style={localStyles.underline} />

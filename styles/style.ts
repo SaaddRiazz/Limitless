@@ -21,6 +21,17 @@ export const auth = StyleSheet.create({
     transform: [{ scaleX: 1.35 }],
     width: '100%',
   },
+  title: {
+    fontSize: 26,
+    fontWeight: "900",
+    color: "#ffffff",
+    letterSpacing: 2,
+    fontStyle: "italic",
+    textShadowColor: "rgba(101, 204, 255, 0.75)",
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
+    paddingStart: 20,
+  },
   welcomeText: {
     fontSize: 16,
     color: "#b3b3b3",
