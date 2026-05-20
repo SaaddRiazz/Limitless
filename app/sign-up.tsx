@@ -1,10 +1,12 @@
 import EmailInput from "@/components/ui/email-input";
 import PasswordInput from "@/components/ui/password-input";
 import { supabase } from "@/lib/supabase";
+import { colors } from "@/styles/colors";
 import { auth } from "@/styles/style";
+import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useRef, useState } from "react";
-import { Alert, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 export default function SignUp() {
   const router = useRouter();
@@ -13,9 +15,7 @@ export default function SignUp() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  // const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
-  // const [showOtp, setShowOtp] = useState(false);
 
   const usernameRef = useRef<TextInput>(null);
   const passwordRef = useRef<TextInput>(null);
@@ -51,7 +51,7 @@ export default function SignUp() {
             level: 1,
             streak: 0
           });
-        
+
         if (profileError) {
           console.error("Profile creation error:", profileError.message);
         }
@@ -69,103 +69,81 @@ export default function SignUp() {
     }
   };
 
-  /*
-  const verifyOtp = async () => {
-    if (otp.length !== 6) {
-      Alert.alert("Error", "Please enter a valid 6-digit code");
-      return;
-    }
-
-    setLoading(true);
-    const { data, error } = await supabase.auth.verifyOtp({
-      email: email,
-      token: otp,
-      type: "signup",
-    });
-
-    if (error) {
-      Alert.alert("Verification Failed", error.message);
-    } else {
-      router.replace("/App");
-    }
-    setLoading(false);
-  };
-  */
-
   return (
-    <View style={auth.innerContainer}>
-      <Text style={auth.logo}>LIMITLESS</Text>
-      <Text style={auth.welcomeText}>
-        Never <Text style={{ color: "#fff" }}>Done. </Text>
-        Only <Text style={{ color: "#fff" }}>Next.</Text>
-      </Text>
-
-      <View style={{ gap: 15 }}>
-        <EmailInput
-          value={email}
-          onChangeText={setEmail}
-          returnKeyType="next"
-          onSubmitEditing={() => usernameRef.current?.focus()}
-          blurOnSubmit={false}
-        />
-
-        <View style={auth.inputContainer}>
-          <TextInput
-            placeholder="Username"
-            placeholderTextColor="#999"
-            style={auth.input}
-            value={username}
-            onChangeText={setUsername}
-            ref={usernameRef}
-            returnKeyType="next"
-            onSubmitEditing={() => passwordRef.current?.focus()}
-            blurOnSubmit={false}
-            autoCapitalize="none"
-          />
-        </View>
-
-        <PasswordInput
-          placeholder="Password"
-          value={password}
-          onChangeText={setPassword}
-          ref={passwordRef}
-          returnKeyType="next"
-          onSubmitEditing={() => confirmPasswordRef.current?.focus()}
-          blurOnSubmit={false}
-        />
-
-        <PasswordInput
-          placeholder="Confirm Password"
-          value={confirmPassword}
-          onChangeText={setConfirmPassword}
-          ref={confirmPasswordRef}
-          returnKeyType="done"
-        />
-
-        {/* 
-        <View style={auth.inputContainer}>
-          <TextInput
-            placeholder="6-Digit OTP Code"
-            placeholderTextColor="#999"
-            style={auth.input}
-            value={otp}
-            onChangeText={setOtp}
-            keyboardType="number-pad"
-            maxLength={6}
-          />
-        </View>
-        */}
+    <LinearGradient colors={["#020205", "#0a0a1a"]} style={auth.innerContainer}>
+      <View style={{ alignItems: "center", marginBottom: 40, marginTop: 30 }}>
+        <Text style={[auth.logo]}>LIMITLESS</Text>
+        <View style={localStyles.underline} />
+        <Text style={localStyles.tagline}>NO EXCUSES. NO BOUNDARIES.</Text>
       </View>
 
-      <TouchableOpacity
-        style={[auth.filledBtn, loading && { opacity: 0.5 }]}
-        onPress={signUpWithEmail}
-        disabled={loading}
-      >
-        <Text style={auth.filledBtnText}>
-          {loading ? "SIGNING UP..." : "SIGN UP"}
-        </Text>
-      </TouchableOpacity>
+      <View style={localStyles.inputsWrapper}>
+        <View style={{ gap: 15 }}>
+          <EmailInput
+            value={email}
+            onChangeText={setEmail}
+            returnKeyType="next"
+            onSubmitEditing={() => usernameRef.current?.focus()}
+            blurOnSubmit={false}
+          />
+
+          <View style={auth.inputContainer}>
+            <TextInput
+              placeholder="Username"
+              placeholderTextColor="#999"
+              style={auth.input}
+              value={username}
+              onChangeText={setUsername}
+              ref={usernameRef}
+              returnKeyType="next"
+              onSubmitEditing={() => passwordRef.current?.focus()}
+              blurOnSubmit={false}
+              autoCapitalize="none"
+            />
+          </View>
+
+          <PasswordInput
+            placeholder="Password"
+            value={password}
+            onChangeText={setPassword}
+            ref={passwordRef}
+            returnKeyType="next"
+            onSubmitEditing={() => confirmPasswordRef.current?.focus()}
+            blurOnSubmit={false}
+          />
+
+          <PasswordInput
+            placeholder="Confirm Password"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            ref={confirmPasswordRef}
+            returnKeyType="done"
+          />
+        </View>
+
+        <TouchableOpacity
+          style={[localStyles.gradientBtnContainer, loading && { opacity: 0.5 }]}
+          onPress={signUpWithEmail}
+          disabled={loading}
+        >
+          <LinearGradient
+            colors={[colors.blue, "#005bb5"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={localStyles.gradientBtn}
+          >
+            <Text style={auth.filledBtnText}>
+              {loading ? "SIGNING UP..." : "SIGN UP"}
+            </Text>
+          </LinearGradient>
+        </TouchableOpacity>
+      </View>
+
+      <View style={localStyles.separatorContainer}>
+        <View style={localStyles.separatorLine} />
+        <Text style={localStyles.separatorText}>OR</Text>
+        <View style={localStyles.separatorLine} />
+      </View>
 
       <View style={auth.registerContainer}>
         <Text style={auth.registerText}>Already have an account?</Text>
@@ -173,6 +151,67 @@ export default function SignUp() {
           <Text style={auth.linkText}> Sign in.</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </LinearGradient>
   );
 }
+
+const localStyles = StyleSheet.create({
+  underline: {
+    height: 2,
+    width: 200,
+    backgroundColor: colors.blue,
+    marginTop: 10,
+    borderRadius: 1,
+    shadowColor: colors.blue,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 10,
+  },
+  tagline: {
+    color: "#666",
+    fontSize: 10,
+    fontWeight: "800",
+    letterSpacing: 5,
+    marginTop: 20,
+    textTransform: "uppercase",
+  },
+  inputsWrapper: {
+    backgroundColor: "rgba(255, 255, 255, 0.02)",
+    padding: 20,
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.05)",
+  },
+  gradientBtnContainer: {
+    marginTop: 25,
+    borderRadius: 10,
+    elevation: 4,
+    shadowColor: colors.blue,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    overflow: "hidden",
+  },
+  gradientBtn: {
+    height: 55,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  separatorContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 30,
+  },
+  separatorLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+  },
+  separatorText: {
+    color: "rgba(255, 255, 255, 0.4)",
+    paddingHorizontal: 15,
+    fontSize: 12,
+    fontWeight: "bold",
+    letterSpacing: 1,
+  },
+});

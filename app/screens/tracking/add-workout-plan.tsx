@@ -2,7 +2,7 @@ import { BackButton } from "@/components/ui/back-button";
 import { PlanExerciseCard } from "@/components/ui/plan-exercise-card";
 import { supabase } from "@/lib/supabase";
 import { colors } from "@/styles/colors";
-import { exercise, logger, main } from "@/styles/style";
+import { auth } from "@/styles/style";
 import * as Crypto from "expo-crypto";
 import { router } from "expo-router";
 import React, { useState } from "react";
@@ -12,11 +12,13 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 
 interface SetEntry {
   id: string;
@@ -143,7 +145,7 @@ export default function AddWorkoutPlan() {
 
       if (planError) throw planError;
 
-      // 2. Save Exercises (schema: plan_id, user_id, exercise_name, target_sets, target_reps, target_weight, order_index)
+      // 2. Save Exercises
       const exercisesToInsert = exercises.map((ex, index) => ({
         plan_id: plan.id,
         user_id: session.user.id,
@@ -171,82 +173,169 @@ export default function AddWorkoutPlan() {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={main.container}
-    >
-      <View>
-        <BackButton color={colors.blue} />
-
-        <Text style={[logger.sectionTitle, { marginBottom: 5, marginTop: 10 }]}>
-          Create Routine
-        </Text>
-
-        <TextInput
-          style={[
-            exercise.exerciseInput,
-            {
-              fontSize: 28,
-              color: colors.blue,
-              borderBottomWidth: 1,
-              borderBottomColor: colors.cardBorder,
-              paddingBottom: 5,
-            },
-          ]}
-          placeholder="Routine Name"
-          placeholderTextColor="#444"
-          value={planName}
-          onChangeText={setPlanName}
-        />
-      </View>
-
-      <ScrollView
-        contentContainerStyle={[exercise.scrollContent, { paddingTop: 20 }]}
-        showsVerticalScrollIndicator={false}
+    <LinearGradient colors={["#020205", "#0a0a1a"]} style={styles.container}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
       >
-        {exercises.map((ex, exIdx) => (
-          <PlanExerciseCard
-            key={ex.id}
-            ex={ex}
-            exIdx={exIdx}
-            onUpdateName={(newName) => {
-              setExercises(
-                exercises.map((e) =>
-                  e.id === ex.id ? { ...e, name: newName } : e,
-                ),
-              );
-            }}
-            onUpdateSet={(setId, updates) => updateSet(ex.id, setId, updates)}
-            onDeleteExercise={() => deleteExercise(ex.id)}
-            onAddSet={() => addSet(ex.id)}
-            onDeleteSet={(setId) => deleteSet(ex.id, setId)}
-          />
-        ))}
+        <View style={{ paddingHorizontal: 20, marginBottom: 10 }}>
+          <BackButton color={colors.blue} />
+          <Text style={[auth.title, { paddingStart: 0, marginTop: 10, marginBottom: 15 }]}>
+            CREATE ROUTINE
+          </Text>
+        </View>
+        <View style={styles.fullLine} />
 
-        <TouchableOpacity style={exercise.addExerciseBtn} onPress={addExercise}>
-          <Text style={exercise.addExerciseText}>+ ADD EXERCISE</Text>
-        </TouchableOpacity>
-      </ScrollView>
-
-      <View style={exercise.fixedFooter}>
-        <TouchableOpacity
-          style={[
-            logger.submitBtn,
-            { backgroundColor: colors.blue },
-            isSaving && { opacity: 0.7 },
-          ]}
-          onPress={handleSavePlan}
-          disabled={isSaving}
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
         >
-          {isSaving ? (
-            <ActivityIndicator color={colors.white} />
-          ) : (
-            <Text style={[logger.submitBtnText, { color: colors.white }]}>
-              SAVE ROUTINE
-            </Text>
-          )}
-        </TouchableOpacity>
-      </View>
-    </KeyboardAvoidingView>
+          <View style={styles.routineInputContainer}>
+            <Text style={styles.inputLabel}>ROUTINE NAME</Text>
+            <TextInput
+              style={styles.routineInput}
+              placeholder="e.g. Hypertrophy Upper body"
+              placeholderTextColor="rgba(255, 255, 255, 0.25)"
+              value={planName}
+              onChangeText={setPlanName}
+            />
+          </View>
+
+          {exercises.map((ex, exIdx) => (
+            <PlanExerciseCard
+              key={ex.id}
+              ex={ex}
+              exIdx={exIdx}
+              onUpdateName={(newName) => {
+                setExercises(
+                  exercises.map((e) =>
+                    e.id === ex.id ? { ...e, name: newName } : e,
+                  ),
+                );
+              }}
+              onUpdateSet={(setId, updates) => updateSet(ex.id, setId, updates)}
+              onDeleteExercise={() => deleteExercise(ex.id)}
+              onAddSet={() => addSet(ex.id)}
+              onDeleteSet={(setId) => deleteSet(ex.id, setId)}
+            />
+          ))}
+
+          <TouchableOpacity style={styles.addExerciseBtn} onPress={addExercise}>
+            <Text style={styles.addExerciseText}>+ ADD EXERCISE</Text>
+          </TouchableOpacity>
+        </ScrollView>
+
+        <View style={styles.fixedFooter}>
+          <TouchableOpacity
+            activeOpacity={0.9}
+            style={styles.saveBtnWrapper}
+            onPress={handleSavePlan}
+            disabled={isSaving}
+          >
+            <LinearGradient
+              colors={["#007AFF", "#003b82"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.saveBtn}
+            >
+              {isSaving ? (
+                <ActivityIndicator color={colors.white} />
+              ) : (
+                <Text style={styles.saveBtnText}>SAVE ROUTINE</Text>
+              )}
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
+    </LinearGradient>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingTop: 50,
+  },
+  fullLine: {
+    height: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    width: "100%",
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 110,
+  },
+  routineInputContainer: {
+    backgroundColor: "rgba(255, 255, 255, 0.03)",
+    borderColor: "rgba(255, 255, 255, 0.05)",
+    borderWidth: 1,
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 20,
+  },
+  inputLabel: {
+    color: "rgba(255, 255, 255, 0.4)",
+    fontSize: 11,
+    fontWeight: "900",
+    letterSpacing: 1.5,
+  },
+  routineInput: {
+    color: "#fff",
+    fontSize: 22,
+    fontWeight: "900",
+    fontStyle: "italic",
+    marginTop: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(255, 255, 255, 0.08)",
+    paddingBottom: 6,
+  },
+  addExerciseBtn: {
+    borderWidth: 1,
+    borderColor: "rgba(33, 150, 243, 0.25)",
+    borderStyle: "dashed",
+    padding: 18,
+    borderRadius: 20,
+    alignItems: "center",
+    backgroundColor: "rgba(33, 150, 243, 0.03)",
+    marginBottom: 40,
+  },
+  addExerciseText: {
+    color: colors.blue,
+    fontWeight: "900",
+    letterSpacing: 1,
+    fontSize: 14,
+  },
+  fixedFooter: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 20,
+    backgroundColor: "#020205",
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255, 255, 255, 0.08)",
+  },
+  saveBtnWrapper: {
+    borderRadius: 15,
+    shadowColor: colors.blue,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 6,
+  },
+  saveBtn: {
+    height: 55,
+    borderRadius: 15,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
+  },
+  saveBtnText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "900",
+    letterSpacing: 1,
+  },
+});

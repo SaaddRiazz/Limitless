@@ -19,22 +19,34 @@ export const HistoryCard = ({
 }: HistoryCardProps) => {
   return (
     <TouchableOpacity
-      style={[
-        styles.card,
-        { backgroundColor: `${color}15`, borderColor: `${color}80` },
-      ]}
+      style={{
+        backgroundColor: "rgba(255, 255, 255, 0.03)",
+        borderColor: "rgba(255, 255, 255, 0.05)",
+        borderWidth: 1,
+        borderRadius: 20,
+        padding: 20,
+        marginBottom: 12,
+      }}
       onPress={onPress}
       activeOpacity={0.8}
     >
-      <View style={[styles.header, { borderBottomColor: `${color}80` }]}>
-        <Text style={styles.dateText}>{date.toUpperCase()}</Text>
-        <MaterialCommunityIcons name="chevron-right" size={18} color="#444" />
+      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10, borderBottomWidth: 1, borderBottomColor: "rgba(255, 255, 255, 0.05)", paddingBottom: 8 }}>
+        <Text style={{ color, fontSize: 10, fontWeight: "900", letterSpacing: 1.5 }}>
+          {date.toUpperCase()}
+        </Text>
+        <MaterialCommunityIcons name="chevron-right" size={20} color="rgba(255, 255, 255, 0.3)" />
       </View>
 
       <View style={styles.content}>
         <View>
-          <Text style={styles.titleText}>{title}</Text>
-          {subtitle && <Text style={styles.subtitleText}>{subtitle}</Text>}
+          <Text style={{ color: "#fff", fontSize: 18, fontWeight: "900", fontStyle: "italic" }}>
+            {title.toUpperCase()}
+          </Text>
+          {subtitle && (
+            <Text style={{ color: "rgba(255, 255, 255, 0.5)", fontSize: 13, marginTop: 4, fontWeight: "600" }}>
+              {subtitle}
+            </Text>
+          )}
         </View>
       </View>
     </TouchableOpacity>
@@ -42,39 +54,8 @@ export const HistoryCard = ({
 };
 
 const styles = StyleSheet.create({
-  card: {
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 6,
-    borderBottomWidth: 1,
-    paddingBottom: 6,
-  },
-  dateText: {
-    color: "#666",
-    fontSize: 10,
-    fontWeight: "900",
-    letterSpacing: 1.5,
-  },
   content: {
     flexDirection: "row",
     alignItems: "center",
-  },
-  titleText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
-    letterSpacing: 0.5,
-  },
-  subtitleText: {
-    color: "#888",
-    fontSize: 12,
-    marginTop: 2,
   },
 });

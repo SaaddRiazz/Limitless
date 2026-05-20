@@ -1,19 +1,20 @@
 import { BackButton } from "@/components/ui/back-button";
 import { supabase } from "@/lib/supabase";
 import { colors } from "@/styles/colors";
-import { auth, logger, main } from "@/styles/style";
+import { auth } from "@/styles/style";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 
 interface WorkoutExercise {
   tempId: string;
@@ -133,35 +134,46 @@ export default function AddGlobalWorkout() {
   };
 
   return (
-    <View style={main.container}>
-      <BackButton color={colors.blue} />
-      <ScrollView contentContainerStyle={{ padding: 20 }}>
-        <Text style={logger.sectionTitle}>Create Global Routine</Text>
+    <LinearGradient colors={["#020205", "#0a0a1a"]} style={styles.container}>
+      <View style={{ paddingHorizontal: 20, marginBottom: 10 }}>
+        <BackButton color={colors.blue} />
+        <Text style={[auth.title, { paddingStart: 0, marginTop: 10, marginBottom: 15 }]}>
+          CREATE GLOBAL ROUTINE
+        </Text>
+      </View>
+      <View style={styles.fullLine} />
 
-        <TextInput
-          style={styles.input}
-          placeholder="Routine Name (e.g., Push Day)"
-          placeholderTextColor="#444"
-          value={workoutName}
-          onChangeText={setWorkoutName}
-        />
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.inputContainer}>
+          <Text style={styles.inputLabel}>ROUTINE NAME</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="e.g. Global Upper Hypertrophy"
+            placeholderTextColor="rgba(255, 255, 255, 0.25)"
+            value={workoutName}
+            onChangeText={setWorkoutName}
+          />
+        </View>
 
-        <TextInput
-          style={[styles.input, { height: 60 }]}
-          placeholder="Routine Description"
-          placeholderTextColor="#444"
-          multiline
-          value={workoutDesc}
-          onChangeText={setWorkoutDesc}
-        />
+        <View style={styles.inputContainer}>
+          <Text style={styles.inputLabel}>DESCRIPTION</Text>
+          <TextInput
+            style={[styles.input, { height: 70, textAlignVertical: "top" }]}
+            placeholder="Describe this workout plan..."
+            placeholderTextColor="rgba(255, 255, 255, 0.25)"
+            multiline
+            value={workoutDesc}
+            onChangeText={setWorkoutDesc}
+          />
+        </View>
 
         <View style={styles.searchSection}>
-          <Text style={styles.label}>ADD EXERCISES</Text>
+          <Text style={styles.inputLabel}>ADD EXERCISES</Text>
           <View style={styles.searchBar}>
             <TextInput
               style={[styles.input, { flex: 1, marginBottom: 0 }]}
               placeholder="Search or type new exercise..."
-              placeholderTextColor="#444"
+              placeholderTextColor="rgba(255, 255, 255, 0.25)"
               value={searchQuery}
               onChangeText={setSearchQuery}
               onFocus={() => setIsSearchFocused(true)}
@@ -190,11 +202,11 @@ export default function AddGlobalWorkout() {
                   style={styles.resultItem}
                   onPress={() => addExerciseToWorkout(item.name)}
                 >
-                  <Text style={{ color: "#fff" }}>{item.name}</Text>
+                  <Text style={{ color: "#fff", fontWeight: "600" }}>{item.name}</Text>
                   <MaterialCommunityIcons
                     name="library-outline"
                     size={16}
-                    color="#666"
+                    color="rgba(255, 255, 255, 0.4)"
                   />
                 </TouchableOpacity>
               ))}
@@ -213,14 +225,14 @@ export default function AddGlobalWorkout() {
                 <TouchableOpacity onPress={() => removeExercise(ex.tempId)}>
                   <MaterialCommunityIcons
                     name="close-circle"
-                    size={20}
+                    size={22}
                     color={colors.red}
                   />
                 </TouchableOpacity>
               </View>
               <View style={styles.inputRow}>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.miniLabel}>SETS</Text>
+                  <Text style={styles.miniLabel}>TARGET SETS</Text>
                   <TextInput
                     style={styles.miniInput}
                     keyboardType="numeric"
@@ -233,7 +245,7 @@ export default function AddGlobalWorkout() {
                   />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.miniLabel}>REPS</Text>
+                  <Text style={styles.miniLabel}>TARGET REPS</Text>
                   <TextInput
                     style={styles.miniInput}
                     keyboardType="numeric"
@@ -251,96 +263,164 @@ export default function AddGlobalWorkout() {
         </View>
 
         <TouchableOpacity
-          style={[
-            auth.filledBtn,
-            { backgroundColor: colors.blue, marginTop: 30 },
-            isSaving && { opacity: 0.7 },
-          ]}
+          activeOpacity={0.9}
+          style={styles.publishBtnWrapper}
           onPress={handleSave}
           disabled={isSaving}
         >
-          {isSaving ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={auth.filledBtnText}>PUBLISH GLOBAL WORKOUT</Text>
-          )}
+          <LinearGradient
+            colors={["#007AFF", "#003b82"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.publishBtn}
+          >
+            {isSaving ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.publishBtnText}>PUBLISH GLOBAL WORKOUT</Text>
+            )}
+          </LinearGradient>
         </TouchableOpacity>
       </ScrollView>
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  input: {
-    backgroundColor: "#111",
-    color: "#fff",
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 15,
+  container: {
+    flex: 1,
+    paddingTop: 50,
+  },
+  fullLine: {
+    height: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    width: "100%",
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 40,
+  },
+  inputContainer: {
+    backgroundColor: "rgba(255, 255, 255, 0.03)",
+    borderColor: "rgba(255, 255, 255, 0.05)",
     borderWidth: 1,
-    borderColor: "#222",
+    borderRadius: 20,
+    padding: 15,
+    marginBottom: 20,
   },
-  label: {
-    color: colors.blue,
-    fontSize: 12,
+  inputLabel: {
+    color: "rgba(255, 255, 255, 0.4)",
+    fontSize: 11,
     fontWeight: "900",
-    marginBottom: 10,
-    letterSpacing: 1,
+    letterSpacing: 1.5,
+    marginBottom: 8,
   },
-  searchSection: { zIndex: 100 },
+  input: {
+    backgroundColor: "#161622",
+    color: "#fff",
+    padding: 14,
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.05)",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  searchSection: {
+    zIndex: 100,
+    backgroundColor: "rgba(255, 255, 255, 0.03)",
+    borderColor: "rgba(255, 255, 255, 0.05)",
+    borderWidth: 1,
+    borderRadius: 20,
+    padding: 15,
+    marginBottom: 20,
+  },
   searchBar: { flexDirection: "row", alignItems: "center", gap: 10 },
   addButton: {
-    width: 50,
-    height: 50,
-    backgroundColor: "#111",
-    borderRadius: 10,
+    width: 48,
+    height: 48,
+    backgroundColor: "#161622",
+    borderRadius: 15,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
     borderColor: colors.blue,
   },
   resultsContainer: {
-    backgroundColor: "#1a1a1a",
-    borderRadius: 10,
-    marginTop: 5,
+    backgroundColor: "#0a0a14",
+    borderRadius: 12,
+    marginTop: 8,
     borderWidth: 1,
-    borderColor: "#333",
+    borderColor: "rgba(255, 255, 255, 0.08)",
+    overflow: "hidden",
   },
   resultItem: {
     padding: 15,
     borderBottomWidth: 1,
-    borderBottomColor: "#222",
+    borderBottomColor: "rgba(255, 255, 255, 0.05)",
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
   },
   exerciseCard: {
-    backgroundColor: "#111",
-    borderRadius: 12,
-    padding: 15,
-    marginBottom: 10,
+    backgroundColor: "rgba(255, 255, 255, 0.03)",
+    borderColor: "rgba(255, 255, 255, 0.05)",
     borderWidth: 1,
-    borderColor: "#222",
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 15,
   },
   cardHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: 15,
   },
-  exerciseName: { color: colors.blue, fontWeight: "bold", fontSize: 16 },
+  exerciseName: {
+    color: colors.blue,
+    fontWeight: "900",
+    fontSize: 16,
+  },
   inputRow: { flexDirection: "row", gap: 20 },
   miniLabel: {
-    color: "#555",
+    color: "rgba(255, 255, 255, 0.4)",
     fontSize: 10,
     fontWeight: "900",
-    marginBottom: 4,
+    letterSpacing: 1,
+    marginBottom: 6,
   },
   miniInput: {
-    backgroundColor: "#000",
-    borderBottomWidth: 1,
-    borderBottomColor: "#333",
+    backgroundColor: "#161622",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.05)",
     color: "#fff",
-    paddingVertical: 5,
+    paddingVertical: 8,
     textAlign: "center",
+    fontSize: 15,
+    fontWeight: "700",
+  },
+  publishBtnWrapper: {
+    borderRadius: 15,
+    shadowColor: colors.blue,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 6,
+    marginTop: 20,
+  },
+  publishBtn: {
+    height: 55,
+    borderRadius: 15,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
+  },
+  publishBtnText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "900",
+    letterSpacing: 1,
   },
 });

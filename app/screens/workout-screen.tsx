@@ -11,7 +11,10 @@ import {
   Text,
   TouchableOpacity,
   View,
+  StyleSheet,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 export default function WorkoutScreen() {
   const router = useRouter();
@@ -90,40 +93,37 @@ export default function WorkoutScreen() {
   };
 
   return (
-    <View style={main.container}>
-      <Text style={[main.headerTitle, { marginBottom: 30, marginTop: 20 }]}>
-        WORKOUT
-      </Text>
+    <LinearGradient colors={["#020205", "#0a0a1a"]} style={styles.container}>
+      <View>
+        <Text style={[auth.title, { marginBottom: 15 }]}>WORKOUT</Text>
+      </View>
+      <View style={styles.fullLine} />
 
-      <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         <TouchableOpacity
-          style={[
-            auth.filledBtn,
-            {
-              backgroundColor: colors.blue,
-              flexDirection: "row",
-              justifyContent: "center",
-              gap: 10,
-              marginTop: 0,
-            },
-          ]}
+          activeOpacity={0.9}
           onPress={() => router.push("/screens/tracking/add-workout-plan")}
+          style={styles.addBtnWrapper}
         >
-          <Text style={auth.filledBtnText}>ADD WORKOUT PLAN</Text>
+          <LinearGradient
+            colors={["#007AFF", "#003b82"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.addBtn}
+          >
+            <MaterialCommunityIcons name="plus" size={24} color="#fff" />
+            <Text style={styles.addBtnText}>ADD WORKOUT PLAN</Text>
+          </LinearGradient>
         </TouchableOpacity>
 
         {/* My Routines */}
-        <Text
-          style={[logger.sectionTitle, { marginTop: 30, marginBottom: 15 }]}
-        >
-          My Routines
-        </Text>
+        <Text style={styles.sectionTitle}>MY ROUTINES</Text>
 
         {loading ? (
           <ActivityIndicator
             size="large"
             color={colors.blue}
-            style={{ marginTop: 20 }}
+            style={{ marginTop: 20, marginBottom: 20 }}
           />
         ) : savedPlans.length > 0 ? (
           savedPlans.map((plan) => (
@@ -132,6 +132,7 @@ export default function WorkoutScreen() {
               title={plan.name}
               subtitle={plan.description || "No description"}
               color={colors.blue}
+              isGlobal={false}
               onPress={() =>
                 router.push({
                   pathname: "/screens/tracking/edit-workout-plan",
@@ -142,25 +143,19 @@ export default function WorkoutScreen() {
             />
           ))
         ) : (
-          <View style={{ alignItems: "center", marginTop: 20 }}>
-            <Text style={{ color: colors.textDark }}>
-              No routines saved yet.
-            </Text>
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>No routines saved yet.</Text>
           </View>
         )}
 
         {/* Global Routines */}
-        <Text
-          style={[logger.sectionTitle, { marginTop: 35, marginBottom: 15 }]}
-        >
-          Global Routines
-        </Text>
+        <Text style={[styles.sectionTitle, { marginTop: 25 }]}>GLOBAL ROUTINES</Text>
 
         {globalLoading ? (
           <ActivityIndicator
             size="large"
-            color={colors.orange}
-            style={{ marginTop: 20 }}
+            color="#a29bfe"
+            style={{ marginTop: 20, marginBottom: 20 }}
           />
         ) : globalWorkouts.length > 0 ? (
           globalWorkouts.map((workout) => (
@@ -169,6 +164,7 @@ export default function WorkoutScreen() {
               title={workout.name}
               subtitle={workout.description || "Global routine"}
               color={colors.orange}
+              isGlobal={true}
               onPress={() =>
                 router.push({
                   pathname: "/screens/tracking/track-workout",
@@ -182,13 +178,79 @@ export default function WorkoutScreen() {
             />
           ))
         ) : (
-          <View style={{ alignItems: "center", marginTop: 20, marginBottom: 40 }}>
-            <Text style={{ color: colors.textDark }}>
-              No global routines available.
-            </Text>
+          <View style={[styles.emptyContainer, { marginBottom: 40 }]}>
+            <Text style={styles.emptyText}>No global routines available.</Text>
           </View>
         )}
       </ScrollView>
-    </View>
+    </LinearGradient>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingTop: 50,
+  },
+  fullLine: {
+    height: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    width: "100%",
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+    paddingTop: 20,
+  },
+  sectionTitle: {
+    color: "rgba(255, 255, 255, 0.4)",
+    fontSize: 12,
+    fontWeight: "800",
+    letterSpacing: 2,
+    marginBottom: 15,
+    marginTop: 30,
+    marginLeft: 5,
+  },
+  addBtnWrapper: {
+    borderRadius: 15,
+    shadowColor: colors.blue,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 6,
+    marginBottom: 10,
+  },
+  addBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 16,
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
+    gap: 8,
+  },
+  addBtnText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "900",
+    letterSpacing: 1,
+  },
+  emptyContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 30,
+    backgroundColor: "rgba(255, 255, 255, 0.01)",
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.05)",
+    borderStyle: "dashed",
+    marginTop: 10,
+    marginBottom: 15,
+  },
+  emptyText: {
+    color: "rgba(255, 255, 255, 0.25)",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+});

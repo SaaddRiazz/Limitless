@@ -16,9 +16,13 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  StyleSheet,
 } from "react-native";
-import { auth, main } from "../../styles/style";
+import { LinearGradient } from "expo-linear-gradient";
+import { auth } from "../../styles/style";
 import { useRouter } from "expo-router";
+import { colors } from "@/styles/colors";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 export default function ProfileScreen() {
   const [loading, setLoading] = useState(true);
@@ -212,34 +216,26 @@ export default function ProfileScreen() {
 
   if (loading && !username && !avatarUrl) {
     return (
-      <View style={[main.container, { justifyContent: "center" }]}>
+      <LinearGradient colors={["#020205", "#0a0a1a"]} style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
         <ActivityIndicator size="large" color="#2196F3" />
-      </View>
+      </LinearGradient>
     );
   }
 
   return (
-    <View style={main.container}>
-      <Text style={[main.headerTitle, { marginBottom: 30, marginTop: 20 }]}>
-        PROFILE
-      </Text>
-      <ScrollView>
+    <LinearGradient colors={["#020205", "#0a0a1a"]} style={styles.container}>
+      <View style={{ paddingHorizontal: 20, marginBottom: 10 }}>
+        <Text style={[auth.title, { paddingStart: 0, marginTop: 10, marginBottom: 15 }]}>
+          PROFILE
+        </Text>
+      </View>
+      <View style={styles.fullLine} />
+
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Avatar Section */}
-        <View style={{ alignItems: "center", marginBottom: 30 }}>
-          <TouchableOpacity onPress={pickImage} disabled={uploading}>
-            <View
-              style={{
-                width: 120,
-                height: 120,
-                borderRadius: 60,
-                backgroundColor: "#2e2e2e",
-                justifyContent: "center",
-                alignItems: "center",
-                borderWidth: 2,
-                borderColor: "#2196F3",
-                overflow: "hidden",
-              }}
-            >
+        <View style={styles.avatarSection}>
+          <TouchableOpacity onPress={pickImage} disabled={uploading} activeOpacity={0.9}>
+            <View style={styles.avatarWrapper}>
               {uploading ? (
                 <ActivityIndicator color="#2196F3" />
               ) : avatarUrl ? (
@@ -248,66 +244,73 @@ export default function ProfileScreen() {
                   style={{ width: "100%", height: "100%" }}
                 />
               ) : (
-                <Text style={{ color: "#b3b3b3", fontSize: 14 }}>
-                  Add Photo
-                </Text>
+                <View style={styles.placeholderWrapper}>
+                  <MaterialCommunityIcons name="camera-plus" size={32} color="rgba(255,255,255,0.4)" />
+                  <Text style={styles.placeholderText}>Add Photo</Text>
+                </View>
               )}
             </View>
           </TouchableOpacity>
         </View>
 
-        {/* XP Card - Matched with Dashboard */}
-        <View style={main.levelContainer}>
-          <View
-            style={{ flexDirection: "row", justifyContent: "space-between" }}
+        {/* Upgraded Level/XP card */}
+        <View style={styles.levelCard}>
+          <LinearGradient
+            colors={["rgba(33, 150, 243, 0.15)", "rgba(0, 0, 0, 0.8)"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={{ padding: 25 }}
           >
-            <Text style={{ color: "#fff", fontWeight: "bold" }}>
-              Level {level}
-            </Text>
-            <Text style={{ color: "#2196F3", fontWeight: "bold" }}>
-              {xp.toLocaleString()} / {nextLevelXP.toLocaleString()} XP
-            </Text>
-          </View>
-
-          <View style={main.progressBarBg}>
-            <Animated.View
-              style={[
-                main.progressBarFill,
-                {
-                  width: animatedWidth.interpolate({
-                    inputRange: [0, 100],
-                    outputRange: ["0%", "100%"],
-                  }),
-                },
-              ]}
-            />
-          </View>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 15 }}>
+              <Text style={{ color: "#fff", fontWeight: "900", fontSize: 18, letterSpacing: 1 }}>LEVEL {level}</Text>
+              <Text style={{ color: "#2196F3", fontWeight: "bold", fontSize: 14 }}>{xp.toLocaleString()} / {nextLevelXP.toLocaleString()} XP</Text>
+            </View>
+            <View style={{ height: 8, backgroundColor: "rgba(0,0,0,0.5)", borderRadius: 4, overflow: "hidden", borderWidth: 1, borderColor: "rgba(255,255,255,0.1)" }}>
+              <Animated.View
+                style={[
+                  { height: "100%", backgroundColor: "#2196F3", borderRadius: 4 },
+                  {
+                    width: animatedWidth.interpolate({
+                      inputRange: [0, 100],
+                      outputRange: ["0%", "100%"],
+                    }),
+                  },
+                ]}
+              />
+            </View>
+          </LinearGradient>
         </View>
 
         {/* Username Section */}
-        <View style={{ gap: 10, marginBottom: 20 }}>
-          <Text style={{ color: "#b3b3b3", marginLeft: 5 }}>Username</Text>
-          <View style={auth.inputContainer}>
-            <TextInput
-              style={auth.input}
-              value={username}
-              onChangeText={setUsername}
-              placeholder="Set your username"
-              placeholderTextColor="#999"
-            />
-          </View>
+        <View style={styles.inputContainer}>
+          <Text style={styles.inputLabel}>USERNAME</Text>
+          <TextInput
+            style={styles.textInput}
+            value={username}
+            onChangeText={setUsername}
+            placeholder="Set your username"
+            placeholderTextColor="rgba(255,255,255,0.25)"
+          />
         </View>
 
         {/* Save Button */}
         <TouchableOpacity
-          style={[auth.filledBtn, (loading || uploading) && { opacity: 0.5 }]}
+          activeOpacity={0.9}
+          style={[styles.saveBtnWrapper, (loading || uploading) && { opacity: 0.5 }]}
           onPress={() => updateProfile({ username, avatar_url: avatarUrl })}
           disabled={loading || uploading}
         >
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-            {loading && <ActivityIndicator color="#fff" size="small" />}
-            <Text style={auth.filledBtnText}>SAVE PROFILE</Text>
-          </View>
+          <LinearGradient
+            colors={["#007AFF", "#003b82"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.saveBtn}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+              {loading && <ActivityIndicator color="#fff" size="small" />}
+              <Text style={styles.btnText}>SAVE PROFILE</Text>
+            </View>
+          </LinearGradient>
         </TouchableOpacity>
 
         {/* Success/Error Message */}
@@ -327,15 +330,140 @@ export default function ProfileScreen() {
 
         {/* Logout Button */}
         <TouchableOpacity
-          style={[
-            auth.filledBtn,
-            { backgroundColor: "#f44336", marginTop: 20 },
-          ]}
+          activeOpacity={0.9}
+          style={styles.logoutBtnWrapper}
           onPress={handleLogout}
         >
-          <Text style={auth.filledBtnText}>LOGOUT</Text>
+          <LinearGradient
+            colors={["#ff3b30", "#8e0a0a"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.logoutBtn}
+          >
+            <Text style={styles.btnText}>LOGOUT</Text>
+          </LinearGradient>
         </TouchableOpacity>
       </ScrollView>
-    </View>
+    </LinearGradient>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingTop: 50,
+  },
+  fullLine: {
+    height: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    width: "100%",
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+    paddingTop: 20,
+  },
+  avatarSection: {
+    alignItems: "center",
+    marginBottom: 30,
+  },
+  avatarWrapper: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: "#161622",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#2196F3",
+    overflow: "hidden",
+    shadowColor: "#2196F3",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  placeholderWrapper: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  placeholderText: {
+    color: "rgba(255, 255, 255, 0.4)",
+    fontSize: 11,
+    fontWeight: "800",
+    letterSpacing: 0.5,
+    marginTop: 4,
+  },
+  levelCard: {
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(33, 150, 243, 0.25)",
+    overflow: "hidden",
+    marginBottom: 30,
+  },
+  inputContainer: {
+    backgroundColor: "rgba(255, 255, 255, 0.03)",
+    borderColor: "rgba(255, 255, 255, 0.05)",
+    borderWidth: 1,
+    borderRadius: 20,
+    padding: 15,
+    marginBottom: 25,
+  },
+  inputLabel: {
+    color: "rgba(255, 255, 255, 0.4)",
+    fontSize: 11,
+    fontWeight: "900",
+    letterSpacing: 1.5,
+    marginBottom: 8,
+  },
+  textInput: {
+    backgroundColor: "#161622",
+    color: "#fff",
+    padding: 14,
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.05)",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  saveBtnWrapper: {
+    borderRadius: 15,
+    shadowColor: colors.blue,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 6,
+    marginBottom: 10,
+  },
+  saveBtn: {
+    height: 55,
+    borderRadius: 15,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
+  },
+  btnText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "900",
+    letterSpacing: 1,
+  },
+  logoutBtnWrapper: {
+    borderRadius: 15,
+    shadowColor: colors.red,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 6,
+    marginTop: 10,
+  },
+  logoutBtn: {
+    height: 55,
+    borderRadius: 15,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
+  },
+});

@@ -3,7 +3,7 @@ import { ExerciseCard } from "@/components/ui/exercise-card";
 import { supabase } from "@/lib/supabase";
 import { addXP, XP_VALUES } from "@/lib/xp-service";
 import { colors } from "@/styles/colors";
-import { exercise, logger, main } from "@/styles/style";
+import { auth } from "@/styles/style";
 import * as Crypto from "expo-crypto";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -13,10 +13,12 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 
 interface SetEntry {
   id: string;
@@ -63,7 +65,6 @@ export default function TrackWorkout() {
       let planExData: any[] = [];
 
       if (isGlobalWorkout) {
-        // Fetch from global_workout_exercises
         const { data, error } = await supabase
           .from("global_workout_exercises")
           .select("*")
@@ -73,7 +74,6 @@ export default function TrackWorkout() {
         if (error) throw error;
         planExData = data || [];
       } else {
-        // Fetch from user plan_exercises
         const { data, error } = await supabase
           .from("plan_exercises")
           .select("*")
@@ -86,7 +86,6 @@ export default function TrackWorkout() {
 
       let prevSets: any[] = [];
 
-      // Previous weight lookup only applies to user plans
       if (!isGlobalWorkout) {
         const { data: lastLog } = await supabase
           .from("workout_logs")
@@ -309,80 +308,155 @@ export default function TrackWorkout() {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={main.container}
-    >
-      <BackButton color={colors.blue} />
-      <ScrollView
-        contentContainerStyle={exercise.scrollContent}
-        showsVerticalScrollIndicator={false}
+    <LinearGradient colors={["#020205", "#0a0a1a"]} style={styles.container}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
       >
-        {loading ? (
-          <ActivityIndicator
-            size="large"
-            color={colors.blue}
-            style={{ marginTop: 50 }}
-          />
-        ) : (
-          <>
-            {exercises.map((ex, exIdx) => (
-              <ExerciseCard
-                key={ex.id}
-                ex={ex}
-                exIdx={exIdx}
-                onUpdateName={(newName) => {
-                  setExercises(
-                    exercises.map((e) =>
-                      e.id === ex.id ? { ...e, name: newName } : e,
-                    ),
-                  );
-                }}
-                onDeleteExercise={() => deleteExercise(ex.id)}
-                onUpdateSet={(setId, updates) =>
-                  updateSet(ex.id, setId, updates)
-                }
-                onAddSet={() => addSet(ex.id)}
-                onDeleteSet={(setId) => deleteSet(ex.id, setId)}
-              />
-            ))}
+        <View style={{ paddingHorizontal: 20, marginBottom: 10 }}>
+          <BackButton color={colors.blue} />
+          <Text style={[auth.title, { paddingStart: 0, marginTop: 10, marginBottom: 15 }]}>
+            {planName ? planName.toUpperCase() : "ACTIVE WORKOUT"}
+          </Text>
+        </View>
+        <View style={styles.fullLine} />
 
-            <TouchableOpacity
-              style={exercise.addExerciseBtn}
-              onPress={addExercise}
-            >
-              <Text style={exercise.addExerciseText}>+ ADD EXERCISE</Text>
-            </TouchableOpacity>
-          </>
-        )}
-      </ScrollView>
-
-      <View style={exercise.fixedFooter}>
-        <TouchableOpacity
-          style={[
-            logger.submitBtn,
-            {
-              backgroundColor: isWorkoutComplete ? colors.blue : colors.divider,
-            },
-            isFinishing && { opacity: 0.7 },
-          ]}
-          disabled={!isWorkoutComplete || isFinishing}
-          onPress={finishWorkout}
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
         >
-          {isFinishing ? (
-            <ActivityIndicator color={colors.white} />
+          {loading ? (
+            <ActivityIndicator
+              size="large"
+              color={colors.blue}
+              style={{ marginTop: 50 }}
+            />
           ) : (
-            <Text
-              style={[
-                logger.submitBtnText,
-                { color: isWorkoutComplete ? colors.white : colors.textDark },
-              ]}
-            >
-              FINISH WORKOUT
-            </Text>
+            <>
+              {exercises.map((ex, exIdx) => (
+                <ExerciseCard
+                  key={ex.id}
+                  ex={ex}
+                  exIdx={exIdx}
+                  onUpdateName={(newName) => {
+                    setExercises(
+                      exercises.map((e) =>
+                        e.id === ex.id ? { ...e, name: newName } : e,
+                      ),
+                    );
+                  }}
+                  onDeleteExercise={() => deleteExercise(ex.id)}
+                  onUpdateSet={(setId, updates) =>
+                    updateSet(ex.id, setId, updates)
+                  }
+                  onAddSet={() => addSet(ex.id)}
+                  onDeleteSet={(setId) => deleteSet(ex.id, setId)}
+                />
+              ))}
+
+              <TouchableOpacity
+                style={styles.addExerciseBtn}
+                onPress={addExercise}
+              >
+                <Text style={styles.addExerciseText}>+ ADD EXERCISE</Text>
+              </TouchableOpacity>
+            </>
           )}
-        </TouchableOpacity>
-      </View>
-    </KeyboardAvoidingView>
+        </ScrollView>
+
+        <View style={styles.fixedFooter}>
+          <TouchableOpacity
+            activeOpacity={0.9}
+            style={[styles.finishBtnWrapper, !isWorkoutComplete && { opacity: 0.5 }]}
+            disabled={!isWorkoutComplete || isFinishing}
+            onPress={finishWorkout}
+          >
+            <LinearGradient
+              colors={isWorkoutComplete ? ["#007AFF", "#003b82"] : ["rgba(255,255,255,0.05)", "rgba(255,255,255,0.02)"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.finishBtn}
+            >
+              {isFinishing ? (
+                <ActivityIndicator color={isWorkoutComplete ? "#fff" : "rgba(255,255,255,0.4)"} />
+              ) : (
+                <Text
+                  style={[
+                    styles.finishBtnText,
+                    { color: isWorkoutComplete ? "#fff" : "rgba(255, 255, 255, 0.3)" },
+                  ]}
+                >
+                  FINISH WORKOUT
+                </Text>
+              )}
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
+    </LinearGradient>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingTop: 50,
+  },
+  fullLine: {
+    height: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    width: "100%",
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 110,
+  },
+  addExerciseBtn: {
+    borderWidth: 1,
+    borderColor: "rgba(33, 150, 243, 0.25)",
+    borderStyle: "dashed",
+    padding: 18,
+    borderRadius: 20,
+    alignItems: "center",
+    backgroundColor: "rgba(33, 150, 243, 0.03)",
+    marginBottom: 40,
+  },
+  addExerciseText: {
+    color: colors.blue,
+    fontWeight: "900",
+    letterSpacing: 1,
+    fontSize: 14,
+  },
+  fixedFooter: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 20,
+    backgroundColor: "#020205",
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255, 255, 255, 0.08)",
+  },
+  finishBtnWrapper: {
+    borderRadius: 15,
+    shadowColor: colors.blue,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 6,
+  },
+  finishBtn: {
+    height: 55,
+    borderRadius: 15,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
+  },
+  finishBtnText: {
+    fontSize: 16,
+    fontWeight: "900",
+    letterSpacing: 1,
+  },
+});

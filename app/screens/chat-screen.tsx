@@ -14,6 +14,8 @@ import {
 } from "react-native";
 import Markdown from "react-native-markdown-display";
 import { auth, main } from "../../styles/style";
+import { LinearGradient } from "expo-linear-gradient";
+import { colors } from "@/styles/colors";
 
 // Initialize Gemini API
 const genAI = new GoogleGenerativeAI(
@@ -63,7 +65,6 @@ export default function ChatScreen() {
 
       let model;
       try {
-        // User's specific model choice
         model = genAI.getGenerativeModel({
           model: "gemini-3.1-flash-lite-preview",
         });
@@ -127,10 +128,11 @@ export default function ChatScreen() {
   };
 
   return (
-    <View style={main.container}>
-      <Text style={[main.headerTitle, { marginBottom: 30, marginTop: 20 }]}>
-        TRAINER AI
-      </Text>
+    <LinearGradient colors={["#020205", "#0a0a1a"]} style={styles.container}>
+      <View>
+        <Text style={[auth.title, { marginBottom: 15 }]}>TRAINER AI</Text>
+      </View>
+      <View style={styles.fullLine} />
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -150,16 +152,16 @@ export default function ChatScreen() {
         {isLoading && (
           <View style={styles.typingContainer}>
             <ActivityIndicator size="small" color="#2196F3" />
-            <Text style={styles.typingText}>Limitless AI is typing...</Text>
+            <Text style={styles.typingText}>Limitless AI is thinking...</Text>
           </View>
         )}
 
         <View style={styles.inputWrapper}>
-          <View style={[auth.inputContainer, styles.inputContainerOverride]}>
+          <View style={styles.inputContainerOverride}>
             <TextInput
-              style={auth.input}
+              style={styles.textInput}
               placeholder="Ask me anything..."
-              placeholderTextColor="#808080"
+              placeholderTextColor="rgba(255,255,255,0.3)"
               value={inputText}
               onChangeText={setInputText}
               multiline
@@ -168,23 +170,31 @@ export default function ChatScreen() {
               onPress={sendMessage}
               disabled={isLoading || !inputText.trim()}
               style={[
-                styles.sendButton,
+                styles.sendButtonWrapper,
                 (!inputText.trim() || isLoading) && { opacity: 0.5 },
               ]}
+              activeOpacity={0.8}
             >
-              <MaterialCommunityIcons name="send" size={24} color="#FFF" />
+              <LinearGradient
+                colors={["#2196F3", "#005bb5"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.sendButton}
+              >
+                <MaterialCommunityIcons name="send" size={18} color="#FFF" />
+              </LinearGradient>
             </TouchableOpacity>
           </View>
         </View>
       </KeyboardAvoidingView>
-    </View>
+    </LinearGradient>
   );
 }
 
 const markdownStyles = StyleSheet.create({
   body: {
-    color: "#FFF",
-    fontSize: 16,
+    color: "rgba(255, 255, 255, 0.9)",
+    fontSize: 15,
     lineHeight: 22,
   },
   bullet_list: {
@@ -194,72 +204,107 @@ const markdownStyles = StyleSheet.create({
     marginVertical: 2,
   },
   strong: {
-    fontWeight: "bold",
+    fontWeight: "900",
     color: "#FFF",
-    fontSize: 18, // Increased from the body's 16
-    lineHeight: 24, // Adjusted slightly to maintain vertical rhythm
+    fontSize: 16,
+    lineHeight: 24,
   },
 });
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingTop: 50,
+  },
+  fullLine: {
+    height: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    width: "100%",
+  },
   chatList: {
+    paddingHorizontal: 20,
     paddingBottom: 20,
+    paddingTop: 20,
   },
   messageBubble: {
     maxWidth: "85%",
-    padding: 12,
-    borderRadius: 15,
-    marginBottom: 10,
+    padding: 15,
+    borderRadius: 20,
+    marginBottom: 12,
+    borderWidth: 1,
   },
   userBubble: {
     alignSelf: "flex-end",
-    backgroundColor: "#2196F3",
-    borderBottomRightRadius: 2,
+    backgroundColor: "rgba(33, 150, 243, 0.08)",
+    borderColor: "rgba(33, 150, 243, 0.25)",
+    borderBottomRightRadius: 4,
   },
   aiBubble: {
     alignSelf: "flex-start",
-    backgroundColor: "#1E1E1E",
-    borderBottomLeftRadius: 2,
+    backgroundColor: "rgba(255, 255, 255, 0.02)",
+    borderColor: "rgba(255, 255, 255, 0.06)",
+    borderBottomLeftRadius: 4,
   },
   messageText: {
-    color: "#FFF",
-    fontSize: 16,
+    color: "rgba(255, 255, 255, 0.9)",
+    fontSize: 15,
     lineHeight: 22,
   },
   timestamp: {
-    color: "rgba(255, 255, 255, 0.5)",
+    color: "rgba(255, 255, 255, 0.4)",
     fontSize: 10,
     alignSelf: "flex-end",
-    marginTop: 4,
+    marginTop: 6,
+    fontWeight: "600",
   },
   inputWrapper: {
-    paddingVertical: 10,
-    backgroundColor: "#00000a",
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    backgroundColor: "transparent",
   },
   inputContainerOverride: {
-    height: "auto",
-    minHeight: 55,
-    paddingVertical: 5,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.02)",
+    borderColor: "rgba(255, 255, 255, 0.06)",
+    borderWidth: 1,
+    borderRadius: 22,
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+  },
+  textInput: {
+    flex: 1,
+    color: "#ffffff",
+    fontSize: 15,
+    maxHeight: 100,
+  },
+  sendButtonWrapper: {
+    borderRadius: 18,
+    shadowColor: "#007AFF",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 6,
+    elevation: 4,
+    marginLeft: 10,
   },
   sendButton: {
-    backgroundColor: "#2196F3",
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     justifyContent: "center",
     alignItems: "center",
-    marginLeft: 10,
   },
   typingContainer: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 10,
+    paddingHorizontal: 25,
     marginBottom: 10,
   },
   typingText: {
-    color: "#808080",
+    color: "rgba(255, 255, 255, 0.4)",
     fontSize: 12,
     marginLeft: 8,
     fontStyle: "italic",
+    fontWeight: "600",
   },
 });

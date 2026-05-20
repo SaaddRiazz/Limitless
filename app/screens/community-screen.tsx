@@ -1,9 +1,10 @@
 import { supabase } from "@/lib/supabase";
 import { colors } from "@/styles/colors";
-import { auth, main } from "@/styles/style";
+import { auth } from "@/styles/style";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import React, { useCallback, useEffect, useState } from "react";
+import { LinearGradient } from "expo-linear-gradient";
+import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -142,7 +143,7 @@ export default function CommunityScreen() {
             image_url: imageUrl,
           })
           .eq("id", editingPostId);
-        
+
         if (error) throw error;
       } else {
         const { error } = await supabase.from("community_posts").insert([
@@ -206,12 +207,12 @@ export default function CommunityScreen() {
       prev.map((p) =>
         p.id === post.id
           ? {
-              ...p,
-              liked: !p.liked,
-              likes_count: p.liked ? p.likes_count - 1 : p.likes_count + 1,
-            }
+            ...p,
+            liked: !p.liked,
+            likes_count: p.liked ? p.likes_count - 1 : p.likes_count + 1,
+          }
           : p,
-      ),
+      )
     );
 
     if (post.liked) {
@@ -238,9 +239,14 @@ export default function CommunityScreen() {
   };
 
   const renderPost = ({ item }: { item: Post }) => (
-    <View style={styles.postCard}>
+    <LinearGradient
+      colors={["rgba(255, 255, 255, 0.05)", "rgba(0, 0, 0, 0.4)"]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.postCard}
+    >
       <View style={styles.postHeader}>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
           {item.profiles?.avatar_url ? (
             <Image
               source={{ uri: item.profiles.avatar_url }}
@@ -248,7 +254,7 @@ export default function CommunityScreen() {
             />
           ) : (
             <View style={styles.avatarPlaceholder}>
-              <MaterialCommunityIcons name="account" size={24} color="#666" />
+              <MaterialCommunityIcons name="account" size={22} color={colors.blue} />
             </View>
           )}
           <View>
@@ -265,10 +271,10 @@ export default function CommunityScreen() {
         </View>
 
         {/* Action Buttons */}
-        <View style={{ flexDirection: "row", gap: 12 }}>
+        <View style={{ flexDirection: "row", gap: 15 }}>
           {(item.user_id === userId || isAdmin) && (
             <TouchableOpacity onPress={() => startEdit(item)}>
-              <MaterialCommunityIcons name="pencil" size={20} color="#888" />
+              <MaterialCommunityIcons name="pencil" size={20} color="rgba(255, 255, 255, 0.4)" />
             </TouchableOpacity>
           )}
           {(item.user_id === userId || isAdmin) && (
@@ -297,40 +303,59 @@ export default function CommunityScreen() {
           <MaterialCommunityIcons
             name={item.liked ? "heart" : "heart-outline"}
             size={20}
-            color={item.liked ? colors.red : colors.red}
+            color={item.liked ? colors.red : "rgba(255, 255, 255, 0.4)"}
+            style={item.liked ? {
+              textShadowColor: "rgba(255, 0, 0, 0.8)",
+              textShadowOffset: { width: 0, height: 0 },
+              textShadowRadius: 10,
+            } : undefined}
           />
           <Text
             style={[
               styles.interactionText,
-              item.liked && { color: colors.red },
+              item.liked && {
+                color: colors.red,
+                textShadowColor: "rgba(255, 0, 0, 0.5)",
+                textShadowOffset: { width: 0, height: 0 },
+                textShadowRadius: 6,
+              },
             ]}
           >
             {item.likes_count || 0}
           </Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </LinearGradient>
   );
 
   return (
-    <View style={main.container}>
+    <LinearGradient colors={["#020205", "#0a0a1a"]} style={styles.container}>
       <View
         style={{
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: 20,
-          marginTop: 10,
+          marginBottom: 15,
+          paddingRight: 20,
         }}
       >
-        <Text style={[main.headerTitle, { marginBottom: 0 }]}>COMMUNITY</Text>
+        <Text style={[auth.title, { marginBottom: 0 }]}>COMMUNITY</Text>
         <TouchableOpacity
-          style={styles.composeBtn}
+          activeOpacity={0.8}
+          style={styles.composeBtnWrapper}
           onPress={() => setModalVisible(true)}
         >
-          <MaterialCommunityIcons name="plus" size={22} color="#fff" />
+          <LinearGradient
+            colors={["#2196F3", "#005bb5"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.composeBtn}
+          >
+            <MaterialCommunityIcons name="plus" size={22} color="#fff" />
+          </LinearGradient>
         </TouchableOpacity>
       </View>
+      <View style={styles.fullLine} />
 
       {loading ? (
         <ActivityIndicator color={colors.blue} style={{ marginTop: 50 }} />
@@ -339,17 +364,12 @@ export default function CommunityScreen() {
           data={posts}
           renderItem={renderPost}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={{ paddingBottom: 30 }}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
           ListEmptyComponent={
-            <Text
-              style={{
-                color: colors.textMuted,
-                textAlign: "center",
-                marginTop: 50,
-              }}
-            >
-              No posts yet. Be the first to share!
-            </Text>
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>No posts yet. Be the first to share!</Text>
+            </View>
           }
         />
       )}
@@ -362,9 +382,14 @@ export default function CommunityScreen() {
         onRequestClose={closeModal}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <LinearGradient
+            colors={["#0c0c1e", "#020205"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            style={styles.modalContent}
+          >
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{editingPostId ? "Edit Post" : "New Post"}</Text>
+              <Text style={styles.modalTitle}>{editingPostId ? "EDIT POST" : "NEW POST"}</Text>
               <TouchableOpacity onPress={closeModal}>
                 <MaterialCommunityIcons name="close" size={24} color="#fff" />
               </TouchableOpacity>
@@ -373,7 +398,7 @@ export default function CommunityScreen() {
             <TextInput
               style={styles.textArea}
               placeholder="Share your progress, tips or motivation..."
-              placeholderTextColor="#444"
+              placeholderTextColor="rgba(255, 255, 255, 0.3)"
               value={postText}
               onChangeText={setPostText}
               multiline
@@ -401,45 +426,81 @@ export default function CommunityScreen() {
               </View>
             ) : (
               <TouchableOpacity
-                style={styles.attachImageBtn}
+                activeOpacity={0.8}
+                style={styles.attachImageBtnWrapper}
                 onPress={pickImage}
               >
-                <MaterialCommunityIcons
-                  name="image-plus"
-                  size={20}
-                  color={colors.blue}
-                />
-                <Text style={{ color: colors.blue, marginLeft: 8 }}>
-                  Attach Image
-                </Text>
+                <LinearGradient
+                  colors={["rgba(33, 150, 243, 0.15)", "rgba(33, 150, 243, 0.02)"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.attachImageBtn}
+                >
+                  <MaterialCommunityIcons
+                    name="image-plus"
+                    size={20}
+                    color={colors.blue}
+                  />
+                  <Text style={{ color: colors.blue, marginLeft: 8, fontWeight: "900", letterSpacing: 0.5 }}>
+                    ATTACH IMAGE
+                  </Text>
+                </LinearGradient>
               </TouchableOpacity>
             )}
 
             <TouchableOpacity
+              activeOpacity={0.9}
               style={[
-                auth.filledBtn,
-                { marginTop: 15 },
+                styles.postSubmitBtnWrapper,
                 isPosting && { opacity: 0.6 },
               ]}
               onPress={submitPost}
               disabled={isPosting}
             >
-              {isPosting ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={auth.filledBtnText}>POST</Text>
-              )}
+              <LinearGradient
+                colors={["#2196F3", "#005bb5"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.postSubmitBtn}
+              >
+                {isPosting ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.postSubmitBtnText}>POST</Text>
+                )}
+              </LinearGradient>
             </TouchableOpacity>
-          </View>
+          </LinearGradient>
         </View>
       </Modal>
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingTop: 50,
+  },
+  fullLine: {
+    height: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    width: "100%",
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+    paddingTop: 20,
+  },
+  composeBtnWrapper: {
+    borderRadius: 20,
+    shadowColor: colors.blue,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 6,
+    elevation: 4,
+  },
   composeBtn: {
-    backgroundColor: colors.blue,
     width: 40,
     height: 40,
     borderRadius: 20,
@@ -447,49 +508,66 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   postCard: {
-    backgroundColor: "#111",
-    borderRadius: 15,
-    padding: 15,
-    marginBottom: 15,
     borderWidth: 1,
-    borderColor: "#222",
+    borderColor: "rgba(255, 255, 255, 0.05)",
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 16,
+    overflow: "hidden",
   },
   postHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 10,
+    marginBottom: 15,
   },
   avatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: "rgba(33, 150, 243, 0.6)",
   },
   avatarPlaceholder: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#222",
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#0d0d1a",
     justifyContent: "center",
     alignItems: "center",
+    borderWidth: 2,
+    borderColor: "rgba(33, 150, 243, 0.4)",
   },
-  username: { color: "#fff", fontWeight: "bold", fontSize: 15 },
-  timestamp: { color: "#555", fontSize: 11, marginTop: 1 },
-  postText: { color: "#ccc", fontSize: 14, lineHeight: 20, marginBottom: 10 },
+  username: {
+    color: "#fff",
+    fontWeight: "900",
+    fontSize: 15,
+    fontStyle: "italic",
+    letterSpacing: 0.5,
+  },
+  timestamp: {
+    color: "rgba(255, 255, 255, 0.4)",
+    fontSize: 11,
+    marginTop: 2,
+    fontWeight: "600",
+  },
+  postText: { color: "rgba(255, 255, 255, 0.8)", fontSize: 14, lineHeight: 22, marginBottom: 15 },
   postImage: {
     width: "100%",
-    height: 200,
-    borderRadius: 10,
-    marginBottom: 10,
+    height: 220,
+    borderRadius: 15,
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.05)",
   },
   postFooter: {
     marginTop: 5,
     borderTopWidth: 1,
-    borderTopColor: "#222",
-    paddingTop: 10,
+    borderTopColor: "rgba(255, 255, 255, 0.05)",
+    paddingTop: 12,
   },
-  interactionBtn: { flexDirection: "row", alignItems: "center", gap: 6 },
-  interactionText: { color: "#666", fontSize: 13 },
+  interactionBtn: { flexDirection: "row", alignItems: "center", gap: 8 },
+  interactionText: { color: "rgba(255, 255, 255, 0.5)", fontSize: 13, fontWeight: "700" },
   // Modal
   modalOverlay: {
     flex: 1,
@@ -497,12 +575,11 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   modalContent: {
-    backgroundColor: "#0a0a0a",
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
-    padding: 20,
+    padding: 25,
     borderTopWidth: 1,
-    borderTopColor: "#222",
+    borderTopColor: "rgba(255,255,255,0.08)",
     minHeight: "60%",
   },
   modalHeader: {
@@ -513,36 +590,41 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     color: "#fff",
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: "900",
     letterSpacing: 1,
+    fontStyle: "italic",
   },
   textArea: {
-    backgroundColor: "#111",
-    borderRadius: 12,
+    backgroundColor: "rgba(255, 255, 255, 0.02)",
+    borderRadius: 15,
     borderWidth: 1,
-    borderColor: "#222",
+    borderColor: "rgba(255, 255, 255, 0.06)",
     padding: 15,
     color: "#fff",
     fontSize: 15,
     minHeight: 120,
     marginBottom: 15,
   },
+  attachImageBtnWrapper: {
+    borderRadius: 15,
+    marginBottom: 12,
+    overflow: "hidden",
+  },
   attachImageBtn: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     borderWidth: 1,
-    borderColor: `${colors.blue}60`,
-    borderRadius: 10,
-    padding: 12,
-    backgroundColor: `${colors.blue}10`,
-    marginBottom: 5,
+    borderColor: "rgba(33, 150, 243, 0.3)",
+    borderRadius: 15,
+    padding: 14,
   },
   previewContainer: { position: "relative", marginBottom: 10 },
   imagePreview: {
     width: "100%",
     height: 160,
-    borderRadius: 12,
+    borderRadius: 15,
   },
   removeImageBtn: {
     position: "absolute",
@@ -550,5 +632,43 @@ const styles = StyleSheet.create({
     right: 8,
     backgroundColor: "rgba(0,0,0,0.6)",
     borderRadius: 11,
+  },
+  postSubmitBtnWrapper: {
+    marginTop: 10,
+    borderRadius: 15,
+    shadowColor: colors.blue,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
+    overflow: "hidden",
+  },
+  postSubmitBtn: {
+    height: 55,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 15,
+  },
+  postSubmitBtnText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "900",
+    letterSpacing: 1,
+  },
+  emptyContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 40,
+    backgroundColor: "rgba(255, 255, 255, 0.01)",
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.03)",
+    borderStyle: "dashed",
+    marginTop: 20,
+  },
+  emptyText: {
+    color: "rgba(255, 255, 255, 0.3)",
+    fontSize: 14,
+    fontWeight: "600",
   },
 });

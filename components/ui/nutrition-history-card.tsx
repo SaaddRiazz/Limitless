@@ -36,23 +36,31 @@ export const NutritionHistoryCard = ({
 
   return (
     <TouchableOpacity
-      style={[
-        styles.card,
-        { backgroundColor: `${color}10`, borderColor: `${color}40` },
-      ]}
+      style={{
+        backgroundColor: "rgba(255, 255, 255, 0.03)",
+        borderColor: "rgba(255, 255, 255, 0.05)",
+        borderWidth: 1,
+        borderRadius: 20,
+        padding: 20,
+        marginBottom: 16,
+      }}
       onPress={onPress}
       activeOpacity={0.8}
     >
-      <View style={[styles.header, { borderBottomColor: `${color}40` }]}>
-        <Text style={styles.dateText}>{date.toUpperCase()}</Text>
-        <MaterialCommunityIcons name="chevron-right" size={18} color="#666" />
+      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12, borderBottomWidth: 1, borderBottomColor: "rgba(255, 255, 255, 0.05)", paddingBottom: 8 }}>
+        <Text style={{ color, fontSize: 10, fontWeight: "900", letterSpacing: 1.5 }}>
+          {date.toUpperCase()}
+        </Text>
+        <MaterialCommunityIcons name="chevron-right" size={20} color="rgba(255, 255, 255, 0.3)" />
       </View>
 
       <View style={styles.content}>
         {sortedMeals.map((meal, index) => (
           <View key={index} style={styles.mealSection}>
             <View style={styles.mealHeaderRow}>
-              <Text style={styles.titleText}>{meal.type}</Text>
+              <Text style={{ color: "#fff", fontSize: 15, fontWeight: "900", fontStyle: "italic" }}>
+                {meal.type.toUpperCase()}
+              </Text>
               <Text style={styles.mealCalText}>{meal.calories} kcal</Text>
             </View>
 
@@ -68,12 +76,12 @@ export const NutritionHistoryCard = ({
           </View>
         ))}
 
-        <View style={[styles.divider, { backgroundColor: `${color}40` }]} />
+        <View style={styles.divider} />
 
         <View style={styles.mealHeaderRow}>
-          <Text style={[styles.titleText, { color: color }]}>TOTAL</Text>
+          <Text style={{ color, fontSize: 16, fontWeight: "900", fontStyle: "italic" }}>TOTAL</Text>
           <Text
-            style={[styles.mealCalText, { color: color, fontWeight: "900" }]}
+            style={{ color, fontSize: 16, fontWeight: "900", textAlign: "right" }}
           >
             {totalCalories} kcal
           </Text>
@@ -84,31 +92,11 @@ export const NutritionHistoryCard = ({
 };
 
 const styles = StyleSheet.create({
-  card: {
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
-    borderWidth: 1,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
-    borderBottomWidth: 1,
-    paddingBottom: 8,
-  },
-  dateText: {
-    color: "#888",
-    fontSize: 11,
-    fontWeight: "900",
-    letterSpacing: 1.5,
-  },
   content: {
     gap: 16,
   },
   mealSection: {
-    gap: 4,
+    gap: 6,
   },
   mealHeaderRow: {
     flexDirection: "row",
@@ -122,34 +110,31 @@ const styles = StyleSheet.create({
     paddingLeft: 8,
     marginTop: 2,
   },
-  titleText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
   subtitleText: {
-    color: "#666",
+    color: "rgba(255, 255, 255, 0.5)",
     fontSize: 13,
     flex: 1,
     paddingRight: 10,
+    fontWeight: "600",
   },
   itemCalText: {
-    color: "#444",
+    color: "rgba(255, 255, 255, 0.3)",
     fontSize: 12,
-    fontWeight: "500",
+    fontWeight: "600",
     textAlign: "right",
     minWidth: 60,
   },
   mealCalText: {
     color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: 14,
+    fontWeight: "700",
     textAlign: "right",
     minWidth: 80,
   },
   divider: {
     height: 1,
     width: "100%",
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
     marginVertical: 4,
   },
 });

@@ -4,6 +4,7 @@ import {
   ActivityIndicator,
   Dimensions,
   ScrollView,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
@@ -13,7 +14,8 @@ import { LineChart } from "react-native-chart-kit";
 import { supabase } from "@/lib/supabase";
 import { addXP, XP_VALUES } from "@/lib/xp-service";
 import { colors } from "../../../styles/colors";
-import { logger, main } from "../../../styles/style";
+import { auth, logger, main } from "../../../styles/style";
+import { LinearGradient } from "expo-linear-gradient";
 
 export default function WeightLog() {
   const [weight, setWeight] = useState("0");
@@ -166,26 +168,33 @@ export default function WeightLog() {
   };
 
   const chartConfig = {
-    backgroundColor: "#000",
-    backgroundGradientFrom: "#000",
-    backgroundGradientTo: "#0a0a0a",
+    backgroundColor: "#020205",
+    backgroundGradientFrom: "#020205",
+    backgroundGradientTo: "#0a0a1a",
     color: (opacity = 1) => `rgba(255, 250, 100, ${opacity})`,
     fillShadowGradientFrom: colors.yellow,
-    fillShadowGradientTo: "#000",
-    fillShadowGradientOpacity: 0.3,
+    fillShadowGradientTo: "#020205",
+    fillShadowGradientOpacity: 0.2,
     strokeWidth: 3,
-    labelColor: (opacity = 1) => "#aaa",
-    propsForBackgroundLines: { stroke: "#1a1a1a" },
+    labelColor: (opacity = 1) => "rgba(255, 255, 255, 0.4)",
+    propsForBackgroundLines: { stroke: "rgba(255, 255, 255, 0.05)" },
   };
 
   return (
-    <View style={main.container}>
-      <BackButton color={colors.yellow} />
-      <ScrollView>
-        <View style={{ marginTop: 20 }}>
+    <LinearGradient colors={["#020205", "#0a0a1a"]} style={styles.container}>
+      <View style={{ paddingHorizontal: 20, marginBottom: 10 }}>
+        <BackButton color={colors.yellow} />
+        <Text style={[auth.title, { paddingStart: 0, marginTop: 10, marginBottom: 15 }]}>
+          BIOMETRICS
+        </Text>
+      </View>
+      <View style={styles.fullLine} />
+
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={{ marginTop: 10 }}>
           <TouchableOpacity
-            activeOpacity={0.7}
-            style={logger.inputGroup}
+            activeOpacity={0.8}
+            style={styles.cardInput}
             onPress={() => {
               weightInputRef.current?.blur();
               setTimeout(() => {
@@ -193,31 +202,22 @@ export default function WeightLog() {
               }, 50);
             }}
           >
-            <Text style={logger.sectionTitle}>Body Mass</Text>
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "baseline",
-                justifyContent: "space-between",
-              }}
-            >
+            <Text style={styles.inputLabel}>BODY MASS</Text>
+            <View style={styles.inputValRow}>
               <TextInput
                 ref={weightInputRef}
-                style={[
-                  logger.largeValue,
-                  { color: colors.yellow, minWidth: 100, fontSize: 30 },
-                ]}
+                style={styles.largeValue}
                 keyboardType="decimal-pad"
                 value={weight}
                 onChangeText={setWeight}
               />
-              <Text style={logger.unitText}> KG</Text>
+              <Text style={styles.unitText}>KG</Text>
             </View>
           </TouchableOpacity>
 
           <TouchableOpacity
-            activeOpacity={0.7}
-            style={logger.inputGroup}
+            activeOpacity={0.8}
+            style={styles.cardInput}
             onPress={() => {
               heightInputRef.current?.blur();
               setTimeout(() => {
@@ -225,40 +225,31 @@ export default function WeightLog() {
               }, 50);
             }}
           >
-            <Text style={logger.sectionTitle}>Height</Text>
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "baseline",
-                justifyContent: "space-between",
-              }}
-            >
+            <Text style={styles.inputLabel}>HEIGHT</Text>
+            <View style={styles.inputValRow}>
               <TextInput
                 ref={heightInputRef}
-                style={[
-                  logger.largeValue,
-                  { color: colors.yellow, minWidth: 100, fontSize: 30 },
-                ]}
+                style={styles.largeValue}
                 keyboardType="decimal-pad"
                 value={height}
                 onChangeText={setHeight}
               />
-              <Text style={logger.unitText}> CM</Text>
+              <Text style={styles.unitText}>CM</Text>
             </View>
           </TouchableOpacity>
         </View>
 
         <View
           style={{
-            backgroundColor: `${bmiData.color}15`,
+            backgroundColor: `${bmiData.color}10`,
             padding: 20,
-            borderRadius: 12,
-            marginVertical: 25,
+            borderRadius: 20,
+            marginVertical: 20,
             borderWidth: 1,
-            borderColor: bmiData.color,
+            borderColor: `${bmiData.color}35`,
           }}
         >
-          <Text style={{ color: "#666", fontSize: 12, fontWeight: "700" }}>
+          <Text style={{ color: "rgba(255, 255, 255, 0.4)", fontSize: 11, fontWeight: "900", letterSpacing: 1.5 }}>
             CURRENT BMI
           </Text>
           <View
@@ -266,50 +257,149 @@ export default function WeightLog() {
               flexDirection: "row",
               justifyContent: "space-between",
               alignItems: "center",
+              marginTop: 5,
             }}
           >
-            <Text style={{ color: "#fff", fontSize: 32, fontWeight: "800" }}>
+            <Text style={{ color: "#fff", fontSize: 32, fontWeight: "900", fontStyle: "italic" }}>
               {bmiData.score}
             </Text>
-            <Text
-              style={{ color: bmiData.color, fontSize: 16, fontWeight: "600" }}
-            >
-              {bmiData.label.toUpperCase()}
-            </Text>
+            <View style={{ backgroundColor: `${bmiData.color}15`, paddingHorizontal: 12, paddingVertical: 4, borderRadius: 8, borderWidth: 1, borderColor: `${bmiData.color}25` }}>
+              <Text style={{ color: bmiData.color, fontSize: 13, fontWeight: "900", letterSpacing: 0.5 }}>
+                {bmiData.label.toUpperCase()}
+              </Text>
+            </View>
           </View>
         </View>
 
         <TouchableOpacity
-          style={[
-            logger.submitBtn,
-            { backgroundColor: colors.yellow, marginBottom: 40 },
-          ]}
+          activeOpacity={0.9}
+          style={styles.saveBtnWrapper}
           onPress={handleUpdate}
           disabled={loading}
         >
-          {loading ? (
-            <ActivityIndicator color={colors.black} />
-          ) : (
-            <Text style={[logger.submitBtnText, { color: "#000" }]}>
-              SAVE BIOMETRICS
-            </Text>
-          )}
+          <LinearGradient
+            colors={["#fffa64", "#c7c22e"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.saveBtn}
+          >
+            {loading ? (
+              <ActivityIndicator color={colors.black} />
+            ) : (
+              <Text style={styles.saveBtnText}>SAVE BIOMETRICS</Text>
+            )}
+          </LinearGradient>
         </TouchableOpacity>
 
-        <Text style={[logger.sectionTitle, { marginBottom: 15 }]}>
-          Weight Projection
-        </Text>
-        <View>
+        <Text style={styles.sectionTitle}>WEIGHT PROJECTION</Text>
+        <View style={styles.chartContainer}>
           <LineChart
             data={chartData}
-            width={Dimensions.get("window").width - 20}
-            height={220}
+            width={Dimensions.get("window").width - 40}
+            height={200}
             chartConfig={chartConfig}
             bezier
-            style={{ borderRadius: 16, marginLeft: -15 }}
+            style={{ borderRadius: 20 }}
           />
         </View>
       </ScrollView>
-    </View>
+    </LinearGradient>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingTop: 50,
+  },
+  fullLine: {
+    height: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    width: "100%",
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+    paddingTop: 20,
+  },
+  cardInput: {
+    backgroundColor: "rgba(255, 255, 255, 0.03)",
+    borderColor: "rgba(255, 255, 255, 0.05)",
+    borderWidth: 1,
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 15,
+  },
+  inputLabel: {
+    color: "rgba(255, 255, 255, 0.4)",
+    fontSize: 11,
+    fontWeight: "900",
+    letterSpacing: 1.5,
+  },
+  inputValRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 8,
+  },
+  largeValue: {
+    color: "#fff",
+    fontSize: 36,
+    fontWeight: "900",
+    fontStyle: "italic",
+    padding: 0,
+    margin: 0,
+    textShadowColor: "rgba(255, 250, 100, 0.3)",
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
+    minWidth: 150,
+  },
+  unitText: {
+    color: colors.yellow,
+    fontSize: 18,
+    fontWeight: "900",
+    fontStyle: "italic",
+    letterSpacing: 0.5,
+  },
+  saveBtnWrapper: {
+    borderRadius: 15,
+    shadowColor: colors.yellow,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 6,
+    marginBottom: 20,
+  },
+  saveBtn: {
+    height: 55,
+    borderRadius: 15,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.15)",
+  },
+  saveBtnText: {
+    color: "#000",
+    fontSize: 16,
+    fontWeight: "900",
+    letterSpacing: 1,
+  },
+  sectionTitle: {
+    color: "rgba(255, 255, 255, 0.4)",
+    fontSize: 12,
+    fontWeight: "800",
+    letterSpacing: 2,
+    marginBottom: 15,
+    marginTop: 25,
+    marginLeft: 5,
+  },
+  chartContainer: {
+    backgroundColor: "rgba(255, 255, 255, 0.02)",
+    borderColor: "rgba(255, 255, 255, 0.05)",
+    borderWidth: 1,
+    borderRadius: 20,
+    overflow: "hidden",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});
