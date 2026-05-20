@@ -170,11 +170,19 @@ export default function ChatScreen() {
               onPress={sendMessage}
               disabled={isLoading || !inputText.trim()}
               style={[
-                styles.sendButton,
+                styles.sendButtonWrapper,
                 (!inputText.trim() || isLoading) && { opacity: 0.5 },
               ]}
+              activeOpacity={0.8}
             >
-              <MaterialCommunityIcons name="send" size={20} color="#FFF" />
+              <LinearGradient
+                colors={["#2196F3", "#005bb5"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.sendButton}
+              >
+                <MaterialCommunityIcons name="send" size={18} color="#FFF" />
+              </LinearGradient>
             </TouchableOpacity>
           </View>
         </View>
@@ -227,14 +235,14 @@ const styles = StyleSheet.create({
   },
   userBubble: {
     alignSelf: "flex-end",
-    backgroundColor: "rgba(0, 122, 255, 0.15)",
-    borderColor: "rgba(0, 122, 255, 0.3)",
+    backgroundColor: "rgba(33, 150, 243, 0.08)",
+    borderColor: "rgba(33, 150, 243, 0.25)",
     borderBottomRightRadius: 4,
   },
   aiBubble: {
     alignSelf: "flex-start",
-    backgroundColor: "rgba(255, 255, 255, 0.03)",
-    borderColor: "rgba(255, 255, 255, 0.05)",
+    backgroundColor: "rgba(255, 255, 255, 0.02)",
+    borderColor: "rgba(255, 255, 255, 0.06)",
     borderBottomLeftRadius: 4,
   },
   messageText: {
@@ -257,8 +265,8 @@ const styles = StyleSheet.create({
   inputContainerOverride: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.03)",
-    borderColor: "rgba(255, 255, 255, 0.05)",
+    backgroundColor: "rgba(255, 255, 255, 0.02)",
+    borderColor: "rgba(255, 255, 255, 0.06)",
     borderWidth: 1,
     borderRadius: 22,
     paddingHorizontal: 15,
@@ -270,19 +278,21 @@ const styles = StyleSheet.create({
     fontSize: 15,
     maxHeight: 100,
   },
-  sendButton: {
-    backgroundColor: "#007AFF",
-    width: 36,
-    height: 36,
+  sendButtonWrapper: {
     borderRadius: 18,
-    justifyContent: "center",
-    alignItems: "center",
-    marginLeft: 10,
     shadowColor: "#007AFF",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.4,
     shadowRadius: 6,
     elevation: 4,
+    marginLeft: 10,
+  },
+  sendButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: "center",
+    alignItems: "center",
   },
   typingContainer: {
     flexDirection: "row",

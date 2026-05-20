@@ -1,19 +1,20 @@
 import { BackButton } from "@/components/ui/back-button";
 import { supabase } from "@/lib/supabase";
 import { colors } from "@/styles/colors";
-import { main } from "@/styles/style";
+import { auth } from "@/styles/style";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    FlatList,
-    Image,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 
 export default function AdminCommunityScreen() {
   const [posts, setPosts] = useState<any[]>([]);
@@ -48,12 +49,12 @@ export default function AdminCommunityScreen() {
 
   const renderPost = ({ item }: { item: any }) => (
     <View style={styles.postCard}>
-      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-        <Text style={styles.username}>{item.profiles?.username}</Text>
+      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+        <Text style={styles.username}>@{item.profiles?.username || "anonymous"}</Text>
         <TouchableOpacity onPress={() => deletePost(item.id)}>
           <MaterialCommunityIcons
             name="trash-can-outline"
-            size={20}
+            size={22}
             color={colors.red}
           />
         </TouchableOpacity>
@@ -70,40 +71,91 @@ export default function AdminCommunityScreen() {
   );
 
   return (
-    <View style={main.container}>
-      <BackButton color={colors.red} />
-      <Text style={[main.headerTitle, { color: colors.red, fontSize: 20 }]}>
-        MODERATION MODE
-      </Text>
+    <LinearGradient colors={["#020205", "#0a0a1a"]} style={styles.container}>
+      <View style={{ paddingHorizontal: 20, marginBottom: 10 }}>
+        <BackButton color={colors.red} />
+        <Text style={[auth.title, { paddingStart: 0, marginTop: 10, marginBottom: 15, textShadowColor: "rgba(255, 59, 48, 0.6)" }]}>
+          MODERATION
+        </Text>
+      </View>
+      <View style={styles.fullLine} />
+
       {loading ? (
-        <ActivityIndicator color={colors.red} />
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color={colors.red} />
+        </View>
       ) : (
         <FlatList
           data={posts}
           renderItem={renderPost}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={{ padding: 20 }}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>No community posts to moderate.</Text>
+            </View>
+          }
         />
       )}
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  postCard: {
-    backgroundColor: "#111",
-    borderRadius: 15,
-    padding: 15,
-    marginBottom: 15,
-    borderLeftWidth: 4,
-    borderLeftColor: colors.red,
+  container: {
+    flex: 1,
+    paddingTop: 50,
   },
-  username: { color: "#fff", fontWeight: "bold" },
-  postText: { color: "#888", marginTop: 5, marginBottom: 10 },
+  fullLine: {
+    height: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    width: "100%",
+  },
+  listContent: {
+    padding: 20,
+    paddingBottom: 40,
+  },
+  postCard: {
+    backgroundColor: "rgba(255, 59, 48, 0.03)",
+    borderColor: "rgba(255, 59, 48, 0.12)",
+    borderWidth: 1,
+    borderRadius: 20,
+    padding: 18,
+    marginBottom: 15,
+  },
+  username: {
+    color: "#fff",
+    fontWeight: "900",
+    fontSize: 14,
+  },
+  postText: {
+    color: "rgba(255, 255, 255, 0.7)",
+    marginTop: 8,
+    marginBottom: 12,
+    fontSize: 15,
+    lineHeight: 22,
+  },
   postImage: {
     width: "100%",
-    height: 180,
-    borderRadius: 10,
-    marginTop: 5,
+    height: 200,
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.05)",
+  },
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  emptyContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 50,
+  },
+  emptyText: {
+    color: "rgba(255, 255, 255, 0.3)",
+    fontSize: 14,
+    fontWeight: "600",
   },
 });

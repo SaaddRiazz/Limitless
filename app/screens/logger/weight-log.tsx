@@ -260,7 +260,7 @@ export default function WeightLog() {
               marginTop: 5,
             }}
           >
-            <Text style={{ color: "#fff", fontSize: 32, fontWeight: "950", fontStyle: "italic" }}>
+            <Text style={{ color: "#fff", fontSize: 32, fontWeight: "900", fontStyle: "italic" }}>
               {bmiData.score}
             </Text>
             <View style={{ backgroundColor: `${bmiData.color}15`, paddingHorizontal: 12, paddingVertical: 4, borderRadius: 8, borderWidth: 1, borderColor: `${bmiData.color}25` }}>
@@ -345,7 +345,7 @@ const styles = StyleSheet.create({
   largeValue: {
     color: "#fff",
     fontSize: 36,
-    fontWeight: "950",
+    fontWeight: "900",
     fontStyle: "italic",
     padding: 0,
     margin: 0,

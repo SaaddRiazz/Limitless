@@ -48,7 +48,7 @@ export const NutritionHistoryCard = ({
       activeOpacity={0.8}
     >
       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12, borderBottomWidth: 1, borderBottomColor: "rgba(255, 255, 255, 0.05)", paddingBottom: 8 }}>
-        <Text style={{ color, fontSize: 10, fontWeight: "950", letterSpacing: 1.5 }}>
+        <Text style={{ color, fontSize: 10, fontWeight: "900", letterSpacing: 1.5 }}>
           {date.toUpperCase()}
         </Text>
         <MaterialCommunityIcons name="chevron-right" size={20} color="rgba(255, 255, 255, 0.3)" />

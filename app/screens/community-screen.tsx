@@ -239,7 +239,12 @@ export default function CommunityScreen() {
   };
 
   const renderPost = ({ item }: { item: Post }) => (
-    <View style={styles.postCard}>
+    <LinearGradient
+      colors={["rgba(255, 255, 255, 0.05)", "rgba(0, 0, 0, 0.4)"]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.postCard}
+    >
       <View style={styles.postHeader}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
           {item.profiles?.avatar_url ? (
@@ -249,7 +254,7 @@ export default function CommunityScreen() {
             />
           ) : (
             <View style={styles.avatarPlaceholder}>
-              <MaterialCommunityIcons name="account" size={24} color="#666" />
+              <MaterialCommunityIcons name="account" size={22} color={colors.blue} />
             </View>
           )}
           <View>
@@ -298,19 +303,29 @@ export default function CommunityScreen() {
           <MaterialCommunityIcons
             name={item.liked ? "heart" : "heart-outline"}
             size={20}
-            color={colors.red}
+            color={item.liked ? colors.red : "rgba(255, 255, 255, 0.4)"}
+            style={item.liked ? {
+              textShadowColor: "rgba(255, 0, 0, 0.8)",
+              textShadowOffset: { width: 0, height: 0 },
+              textShadowRadius: 10,
+            } : undefined}
           />
           <Text
             style={[
               styles.interactionText,
-              item.liked && { color: colors.red },
+              item.liked && {
+                color: colors.red,
+                textShadowColor: "rgba(255, 0, 0, 0.5)",
+                textShadowOffset: { width: 0, height: 0 },
+                textShadowRadius: 6,
+              },
             ]}
           >
             {item.likes_count || 0}
           </Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </LinearGradient>
   );
 
   return (
@@ -327,10 +342,17 @@ export default function CommunityScreen() {
         <Text style={[auth.title, { marginBottom: 0 }]}>COMMUNITY</Text>
         <TouchableOpacity
           activeOpacity={0.8}
-          style={styles.composeBtn}
+          style={styles.composeBtnWrapper}
           onPress={() => setModalVisible(true)}
         >
-          <MaterialCommunityIcons name="plus" size={22} color="#fff" />
+          <LinearGradient
+            colors={["#2196F3", "#005bb5"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.composeBtn}
+          >
+            <MaterialCommunityIcons name="plus" size={22} color="#fff" />
+          </LinearGradient>
         </TouchableOpacity>
       </View>
       <View style={styles.fullLine} />
@@ -360,7 +382,12 @@ export default function CommunityScreen() {
         onRequestClose={closeModal}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <LinearGradient
+            colors={["#0c0c1e", "#020205"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            style={styles.modalContent}
+          >
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>{editingPostId ? "EDIT POST" : "NEW POST"}</Text>
               <TouchableOpacity onPress={closeModal}>
@@ -371,7 +398,7 @@ export default function CommunityScreen() {
             <TextInput
               style={styles.textArea}
               placeholder="Share your progress, tips or motivation..."
-              placeholderTextColor="#555"
+              placeholderTextColor="rgba(255, 255, 255, 0.3)"
               value={postText}
               onChangeText={setPostText}
               multiline
@@ -399,36 +426,51 @@ export default function CommunityScreen() {
               </View>
             ) : (
               <TouchableOpacity
-                style={styles.attachImageBtn}
+                activeOpacity={0.8}
+                style={styles.attachImageBtnWrapper}
                 onPress={pickImage}
               >
-                <MaterialCommunityIcons
-                  name="image-plus"
-                  size={20}
-                  color={colors.blue}
-                />
-                <Text style={{ color: colors.blue, marginLeft: 8, fontWeight: "700" }}>
-                  Attach Image
-                </Text>
+                <LinearGradient
+                  colors={["rgba(33, 150, 243, 0.15)", "rgba(33, 150, 243, 0.02)"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.attachImageBtn}
+                >
+                  <MaterialCommunityIcons
+                    name="image-plus"
+                    size={20}
+                    color={colors.blue}
+                  />
+                  <Text style={{ color: colors.blue, marginLeft: 8, fontWeight: "900", letterSpacing: 0.5 }}>
+                    ATTACH IMAGE
+                  </Text>
+                </LinearGradient>
               </TouchableOpacity>
             )}
 
             <TouchableOpacity
+              activeOpacity={0.9}
               style={[
-                auth.filledBtn,
-                { marginTop: 15 },
+                styles.postSubmitBtnWrapper,
                 isPosting && { opacity: 0.6 },
               ]}
               onPress={submitPost}
               disabled={isPosting}
             >
-              {isPosting ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={auth.filledBtnText}>POST</Text>
-              )}
+              <LinearGradient
+                colors={["#2196F3", "#005bb5"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.postSubmitBtn}
+              >
+                {isPosting ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.postSubmitBtnText}>POST</Text>
+                )}
+              </LinearGradient>
             </TouchableOpacity>
-          </View>
+          </LinearGradient>
         </View>
       </Modal>
     </LinearGradient>
@@ -450,26 +492,28 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
     paddingTop: 20,
   },
-  composeBtn: {
-    backgroundColor: "#007AFF",
-    width: 40,
-    height: 40,
+  composeBtnWrapper: {
     borderRadius: 20,
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#007AFF",
+    shadowColor: colors.blue,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.4,
     shadowRadius: 6,
     elevation: 4,
   },
+  composeBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   postCard: {
-    backgroundColor: "rgba(255, 255, 255, 0.03)",
-    borderColor: "rgba(255, 255, 255, 0.05)",
     borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.05)",
     borderRadius: 20,
     padding: 20,
     marginBottom: 16,
+    overflow: "hidden",
   },
   postHeader: {
     flexDirection: "row",
@@ -481,21 +525,32 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    borderWidth: 2,
+    borderColor: "rgba(33, 150, 243, 0.6)",
   },
   avatarPlaceholder: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#161622",
+    backgroundColor: "#0d0d1a",
     justifyContent: "center",
     alignItems: "center",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    borderWidth: 2,
+    borderColor: "rgba(33, 150, 243, 0.4)",
   },
-  username: { color: "#fff", fontWeight: "900", fontSize: 16 },
-  timestamp: { color: "rgba(255, 255, 255, 0.4)", fontSize: 11, marginTop: 1, fontWeight: "600" },
+  username: {
+    color: "#fff",
+    fontWeight: "900",
+    fontSize: 15,
+    fontStyle: "italic",
+    letterSpacing: 0.5,
+  },
+  timestamp: {
+    color: "rgba(255, 255, 255, 0.4)",
+    fontSize: 11,
+    marginTop: 2,
+    fontWeight: "600",
+  },
   postText: { color: "rgba(255, 255, 255, 0.8)", fontSize: 14, lineHeight: 22, marginBottom: 15 },
   postImage: {
     width: "100%",
@@ -520,12 +575,11 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   modalContent: {
-    backgroundColor: "#0a0a14",
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
-    padding: 20,
+    padding: 25,
     borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.05)",
+    borderTopColor: "rgba(255,255,255,0.08)",
     minHeight: "60%",
   },
   modalHeader: {
@@ -542,25 +596,29 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
   },
   textArea: {
-    backgroundColor: "#161622",
+    backgroundColor: "rgba(255, 255, 255, 0.02)",
     borderRadius: 15,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.05)",
+    borderColor: "rgba(255, 255, 255, 0.06)",
     padding: 15,
     color: "#fff",
     fontSize: 15,
     minHeight: 120,
     marginBottom: 15,
   },
+  attachImageBtnWrapper: {
+    borderRadius: 15,
+    marginBottom: 12,
+    overflow: "hidden",
+  },
   attachImageBtn: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     borderWidth: 1,
-    borderColor: `${colors.blue}40`,
+    borderColor: "rgba(33, 150, 243, 0.3)",
     borderRadius: 15,
-    padding: 12,
-    backgroundColor: `${colors.blue}10`,
-    marginBottom: 5,
+    padding: 14,
   },
   previewContainer: { position: "relative", marginBottom: 10 },
   imagePreview: {
@@ -574,6 +632,28 @@ const styles = StyleSheet.create({
     right: 8,
     backgroundColor: "rgba(0,0,0,0.6)",
     borderRadius: 11,
+  },
+  postSubmitBtnWrapper: {
+    marginTop: 10,
+    borderRadius: 15,
+    shadowColor: colors.blue,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
+    overflow: "hidden",
+  },
+  postSubmitBtn: {
+    height: 55,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 15,
+  },
+  postSubmitBtnText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "900",
+    letterSpacing: 1,
   },
   emptyContainer: {
     alignItems: "center",
